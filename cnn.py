@@ -76,7 +76,8 @@ class GestureDataset(Dataset) :
             T.RandomRotation(10),
             T.ColorJitter(brightness=(0.5,1.5), contrast=(0.5,1.5), saturation=(0.5,1.5)),
             T.RandomResizedCrop(28, scale=(1.0, 2)),
-            T.ToTensor()
+            T.ToImage(),
+            T.ToDtype(torch.float32, scale=True)
         ])
         
 
@@ -171,7 +172,13 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--epochs", type=int, default=10)
     parser.add_argument("--batch_size", type=int, default=128)
-    parser.add_argument("--train", type=bool, default=True)
+    parser.add_argument("--train", type=int, default=1)
+
+
+    epochs = parser.parse_args().epochs
+    batch_size = parser.parse_args().batch_size
+    training = parser.parse_args().train
+
     args = parser.parse_args()
 
     train_loader, test_loader = dataset()
@@ -180,7 +187,9 @@ if __name__ == "__main__":
 
     if os.path.exists("asl.pth") and not args.train:
         model.load_state_dict(torch.load("asl.pth"))
-        
+        model.eval()
+        print(summary(model, (1, 28, 28)))
+
     else:
         optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
         print(summary(model, (1, 28, 28)))
