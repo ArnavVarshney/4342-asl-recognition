@@ -20,6 +20,7 @@ cv2.namedWindow("ROI", cv2.WINDOW_NORMAL)
 
 while True:
     ret, frame = cap.read()
+    frame = cv2.flip(frame, 1)
 
     roi = frame[top:bot, right:left]
     roi = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
