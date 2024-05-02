@@ -4,7 +4,7 @@ import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
 from torch.utils.data.sampler import SubsetRandomSampler
 from torchsummary import summary
-import torchvision.transforms as T
+from torchvision.transforms import v2 as T
 import utils
 import numpy as np
 import pandas as pd
@@ -28,44 +28,35 @@ class CNN(nn.Module):
         self.conv1 = nn.Sequential(
             nn.Conv2d(in_channels, 16, kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(16),
-            nn.LeakyReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2)
+            nn.LeakyReLU(inplace=True)
         )
 
         self.conv2 = nn.Sequential(
             nn.Conv2d(16, 32, kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(32),
-            nn.LeakyReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2)
+            nn.LeakyReLU(inplace=True),
+            nn.MaxPool2d(2),
         )
         
         self.conv3 = nn.Sequential(
             nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(64),
-            nn.LeakyReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2)
-        )
-
-        self.conv4 = nn.Sequential(
-            nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm2d(128),
-            nn.LeakyReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2)
+            nn.LeakyReLU(inplace=True),
+            nn.MaxPool2d(2),
         )
 
         self.fc = nn.Sequential(
-            nn.Linear(128 * 1 * 1, 128),
-            nn.LeakyReLU(),
-            nn.Linear(128, out_features)
+            nn.Flatten(),
+            nn.Linear(64 * 7 * 7, out_features)
         )
 
     def forward(self, img):
         img = self.conv1(img)
         img = self.conv2(img)
         img = self.conv3(img)
-        img = self.conv4(img)
-        img = img.view(img.size(0), -1)
-        return self.fc(img)
+        img = self.fc(img)
+        img = F.log_softmax(img, dim=1)
+        return img
     
     def loss(self, x, label):
         loss = self.criterion(x, label)
@@ -81,9 +72,14 @@ class GestureDataset(Dataset) :
         self.img = self.img.values.reshape(-1, 28, 28, 1)
         
         self.transform = T.Compose([
+            T.ToPILImage(),
+            T.RandomRotation(10),
+            T.ColorJitter(brightness=(0.5,1.5), contrast=(0.5,1.5), saturation=(0.5,1.5)),
+            T.RandomResizedCrop(28, scale=(1.0, 2)),
             T.ToTensor()
         ])
         
+
     def __len__(self) :
         return len(self.img)
     
@@ -100,6 +96,9 @@ class GestureDataset(Dataset) :
 def dataset():
     train_dataset = GestureDataset(os.path.join(dirname, 'mnist-sign-language/train/sign_mnist_train.csv'))
     test_dataset = GestureDataset(os.path.join(dirname, 'mnist-sign-language/test/sign_mnist_test.csv'))
+    
+    # train_dataset = GestureDataset(os.path.join(dirname, 'train.csv'))
+    # test_dataset = GestureDataset(os.path.join(dirname, 'test.csv'))
     
     train_loader=torch.utils.data.DataLoader(train_dataset,batch_size=batch_size,shuffle=True)
     test_loader=torch.utils.data.DataLoader(test_dataset,batch_size=batch_size,shuffle=True)
@@ -181,6 +180,7 @@ if __name__ == "__main__":
 
     if os.path.exists("asl.pth") and not args.train:
         model.load_state_dict(torch.load("asl.pth"))
+        
     else:
         optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
         print(summary(model, (1, 28, 28)))
