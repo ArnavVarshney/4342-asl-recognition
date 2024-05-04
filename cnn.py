@@ -1,17 +1,15 @@
+import argparse
+import os
+
+import pandas as pd
 import torch
-import torch.nn.functional as F
 import torch.nn as nn
-from torch.utils.data import Dataset, DataLoader
-from torch.utils.data.sampler import SubsetRandomSampler
+import torch.nn.functional as F
+from torch.utils.data import Dataset
 from torchsummary import summary
 from torchvision.transforms import v2 as T
+
 import utils
-import numpy as np
-import pandas as pd
-import cv2 as cv2
-import os
-import matplotlib.pyplot as plt
-import argparse
 
 batch_size = 128
 num_classes = 26
@@ -19,6 +17,7 @@ epochs = 10
 dirname = os.path.dirname(__file__)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 
 class CNN(nn.Module):
     def __init__(self, in_channels=1, out_features=num_classes):
@@ -37,7 +36,7 @@ class CNN(nn.Module):
             nn.LeakyReLU(inplace=True),
             nn.MaxPool2d(2),
         )
-        
+
         self.conv3 = nn.Sequential(
             nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(64),
@@ -57,54 +56,56 @@ class CNN(nn.Module):
         img = self.fc(img)
         img = F.log_softmax(img, dim=1)
         return img
-    
+
     def loss(self, x, label):
         loss = self.criterion(x, label)
         return loss
 
-class GestureDataset(Dataset) :
-    def __init__(self, csv_file) :
+
+class GestureDataset(Dataset):
+    def __init__(self, csv_file):
         self.data = pd.read_csv(csv_file)
         self.classes = self.data['label']
 
         self.img = self.data.drop('label', axis=1)
         self.img = self.img / 255.0
         self.img = self.img.values.reshape(-1, 28, 28, 1)
-        
+
         self.transform = T.Compose([
             T.ToPILImage(),
             T.RandomRotation(10),
-            T.ColorJitter(brightness=(0.5,1.5), contrast=(0.5,1.5), saturation=(0.5,1.5)),
+            T.ColorJitter(brightness=(0.5, 1.5), contrast=(0.5, 1.5), saturation=(0.5, 1.5)),
             T.RandomResizedCrop(28, scale=(1.0, 2)),
             T.ToImage(),
             T.ToDtype(torch.float32, scale=True)
         ])
-        
 
-    def __len__(self) :
+    def __len__(self):
         return len(self.img)
-    
-    def __getitem__(self, index) :
+
+    def __getitem__(self, index):
         label = self.classes[index]
         img = self.img[index]
         img = self.transform(img)
-        
+
         label = torch.LongTensor([label])
         img = img.float()
-        
+
         return img, label
-    
+
+
 def dataset():
     train_dataset = GestureDataset(os.path.join(dirname, 'mnist-sign-language/train/sign_mnist_train.csv'))
     test_dataset = GestureDataset(os.path.join(dirname, 'mnist-sign-language/test/sign_mnist_test.csv'))
-    
+
     # train_dataset = GestureDataset(os.path.join(dirname, 'train.csv'))
     # test_dataset = GestureDataset(os.path.join(dirname, 'test.csv'))
-    
-    train_loader=torch.utils.data.DataLoader(train_dataset,batch_size=batch_size,shuffle=True)
-    test_loader=torch.utils.data.DataLoader(test_dataset,batch_size=batch_size,shuffle=True)
 
-    return train_loader,test_loader
+    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
+
+    return train_loader, test_loader
+
 
 def train(model, train_loader, optimizer, num_epochs):
     train_losses = []
@@ -149,7 +150,6 @@ def train(model, train_loader, optimizer, num_epochs):
     utils.plot_curves(train_losses, train_accuracies)
 
 
-
 def test(model, test_loader):
     model.eval()
     correct, total = 0, 0
@@ -163,7 +163,7 @@ def test(model, test_loader):
             _, predicted = torch.max(predicted, 1)
             total += y.size(0)
             correct += (predicted == y.squeeze()).sum().item()
-            
+
     print(f"Test Accuracy: {100 * correct / total:.2f}%")
     return 100 * correct / total
 
@@ -173,7 +173,6 @@ if __name__ == "__main__":
     parser.add_argument("--epochs", type=int, default=10)
     parser.add_argument("--batch_size", type=int, default=128)
     parser.add_argument("--train", type=int, default=1)
-
 
     epochs = parser.parse_args().epochs
     batch_size = parser.parse_args().batch_size

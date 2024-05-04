@@ -1,10 +1,11 @@
+import math
+import os
+import time
+
+import matplotlib.pyplot as plt
+import numpy as np
 import torch
 import torch.nn as nn
-import matplotlib.pyplot as plt
-import os
-import numpy as np
-import math
-import time
 from torchprofile import profile_macs
 
 
@@ -14,10 +15,12 @@ def calculate_accuracy(y_pred, y):
     total = y.size(0)
     return 100 * correct / total
 
+
 def calculate_compression_rate(X, step_size):
     original_size = torch.numel(X) * X.element_size()
     quantized_size = torch.numel(X) * step_size.element_size()
     return original_size / quantized_size
+
 
 def plot_curves(train_losses, train_accuracies):
     plt.figure(figsize=(12, 6))
@@ -37,32 +40,35 @@ def plot_curves(train_losses, train_accuracies):
     plt.tight_layout()
     plt.show()
 
+
 def get_file_size(filename) -> int:
-    return os.path.getsize(filename)/1e3
+    return os.path.getsize(filename) / 1e3
+
 
 @torch.inference_mode()
 def evaluate(
-  model,
-  dataloader, 
-  verbose=True,
+        model,
+        dataloader,
+        verbose=True,
 ) -> float:
-  model.eval()
+    model.eval()
 
-  num_samples = 0
-  num_correct = 0
+    num_samples = 0
+    num_correct = 0
 
-  for inputs, targets in dataloader:
-    inputs = inputs.cuda()
-    targets = targets.cuda()
+    for inputs, targets in dataloader:
+        inputs = inputs.cuda()
+        targets = targets.cuda()
 
-    outputs = model(inputs)
+        outputs = model(inputs)
 
-    outputs = outputs.argmax(dim=1)
+        outputs = outputs.argmax(dim=1)
 
-    num_samples += targets.size(0)
-    num_correct += (outputs == targets).sum()
+        num_samples += targets.size(0)
+        num_correct += (outputs == targets).sum()
 
-  return (num_correct / num_samples * 100).item()
+    return (num_correct / num_samples * 100).item()
+
 
 @torch.no_grad()
 def sensitivity_scan(model, test_loader, scan_step=0.1, scan_start=0.4, scan_end=1.0, verbose=False):
@@ -82,13 +88,16 @@ def sensitivity_scan(model, test_loader, scan_step=0.1, scan_start=0.4, scan_end
             param.copy_(param_clone)
             accuracy.append(acc)
         if verbose:
-            print(f'\r    sparsity=[{",".join(["{:.2f}".format(x) for x in sparsities])}]: accuracy=[{", ".join(["{:.2f}%".format(x) for x in accuracy])}]', end='')
+            print(
+                f'\r    sparsity=[{",".join(["{:.2f}".format(x) for x in sparsities])}]: accuracy=[{", ".join(["{:.2f}%".format(x) for x in accuracy])}]',
+                end='')
         accuracies.append(accuracy)
     return sparsities, accuracies
 
+
 def plot_sensitivity_scan(model, sparsities, accuracies, dense_model_accuracy):
     lower_bound_accuracy = 100 - (100 - dense_model_accuracy) * 1.5
-    fig, axes = plt.subplots(3, int(math.ceil(len(accuracies) / 3)),figsize=(15,8))
+    fig, axes = plt.subplots(3, int(math.ceil(len(accuracies) / 3)), figsize=(15, 8))
     axes = axes.ravel()
     plot_index = 0
     for name, param in model.named_parameters():
@@ -112,7 +121,8 @@ def plot_sensitivity_scan(model, sparsities, accuracies, dense_model_accuracy):
     fig.subplots_adjust(top=0.925)
     plt.show()
 
-def fine_grained_prune(tensor: torch.Tensor, sparsity : float) -> torch.Tensor:
+
+def fine_grained_prune(tensor: torch.Tensor, sparsity: float) -> torch.Tensor:
     sparsity = np.clip(sparsity, 0.0, 1.0)
 
     if sparsity == 1.0:
@@ -120,7 +130,7 @@ def fine_grained_prune(tensor: torch.Tensor, sparsity : float) -> torch.Tensor:
         return torch.zeros_like(tensor)
     elif sparsity == 0.0:
         return torch.ones_like(tensor)
-    
+
     num_elements = tensor.numel()
 
     num_zeros = round(num_elements * sparsity)
@@ -131,6 +141,7 @@ def fine_grained_prune(tensor: torch.Tensor, sparsity : float) -> torch.Tensor:
     tensor.mul_(mask)
 
     return mask.long()
+
 
 def plot_num_parameters_distribution(model):
     num_parameters = dict()
@@ -146,6 +157,7 @@ def plot_num_parameters_distribution(model):
     plt.tight_layout()
     plt.show()
 
+
 def get_num_parameters(model: nn.Module, count_nonzero_only=False) -> int:
     num_counted_elements = 0
     for param in model.parameters():
@@ -155,6 +167,7 @@ def get_num_parameters(model: nn.Module, count_nonzero_only=False) -> int:
             num_counted_elements += param.numel()
     return num_counted_elements
 
+
 def get_model_sparsity(model: nn.Module) -> float:
     num_nonzeros, num_elements = 0, 0
     for param in model.parameters():
@@ -162,8 +175,10 @@ def get_model_sparsity(model: nn.Module) -> float:
         num_elements += param.numel()
     return float(num_nonzeros) / num_elements
 
+
 def get_model_size(model: nn.Module, data_width=32, count_nonzero_only=False) -> int:
     return get_num_parameters(model, count_nonzero_only) * data_width
+
 
 @torch.no_grad()
 def measure_latency(model, dummy_input, n_warmup=20, n_test=100):
@@ -176,8 +191,10 @@ def measure_latency(model, dummy_input, n_warmup=20, n_test=100):
     t2 = time.time()
     return (t2 - t1) / n_test  # average latency
 
+
 def get_model_macs(model, inputs) -> int:
     return profile_macs(model, inputs)
+
 
 def get_num_parameters(model: nn.Module, count_nonzero_only=False) -> int:
     num_counted_elements = 0
@@ -192,13 +209,14 @@ def get_num_parameters(model: nn.Module, count_nonzero_only=False) -> int:
 def get_model_size(model: nn.Module, data_width=32, count_nonzero_only=False) -> int:
     return get_num_parameters(model, count_nonzero_only) * data_width
 
-def measure(model, loader):
-    dummy_input,_ = next(iter(loader))
 
-    size = get_model_size(model=model, count_nonzero_only=True)/(8*2**10)
+def measure(model, loader):
+    dummy_input, _ = next(iter(loader))
+
+    size = get_model_size(model=model, count_nonzero_only=True) / (8 * 2 ** 10)
     latency = measure_latency(model, dummy_input)
     macs = get_model_macs(model, dummy_input)
     param = get_num_parameters(model, count_nonzero_only=True)
-    accuracy = evaluate(model,loader)
-    
+    accuracy = evaluate(model, loader)
+
     return size.item(), latency, param, macs, accuracy

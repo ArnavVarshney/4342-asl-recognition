@@ -1,9 +1,11 @@
 import cv2
-import torch
 import numpy as np
+import torch
+
 from cnn import CNN
 
-classnames = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
+classnames = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u',
+              'v', 'w', 'x', 'y', 'z']
 
 model = CNN(1, 26)
 model.load_state_dict(torch.load('asl.pth'))
@@ -23,7 +25,7 @@ while True:
     frame = cv2.flip(frame, 1)
 
     roi = frame[top:bot, right:left]
-    roi = cv2.resize(roi, dsize=(28, 28), interpolation = cv2.INTER_CUBIC)
+    roi = cv2.resize(roi, dsize=(28, 28), interpolation=cv2.INTER_CUBIC)
     roi = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
 
     roi = np.reshape(roi, (1, 1, 28, 28))
