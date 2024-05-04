@@ -94,16 +94,25 @@ class CNN_Quantized(nn.Module):
     @torch.no_grad()
     def change_datatype(self):
         params = self.state_dict()
-        params["conv1.0.weight"] = torch.round(params["conv1.0.weight"] / self.conv1[0].weight_quantizer.step_size).to(torch.int8)
-        params["conv1.1.weight"] = torch.round(params["conv1.1.weight"] / self.conv1[1].weight_quantizer.step_size).to(torch.int8)
-        params["conv2.0.weight"] = torch.round(params["conv2.0.weight"] / self.conv2[0].weight_quantizer.step_size).to(torch.int8)
-        params["conv2.1.weight"] = torch.round(params["conv2.1.weight"] / self.conv2[1].weight_quantizer.step_size).to(torch.int8)
-        params["conv3.0.weight"] = torch.round(params["conv3.0.weight"] / self.conv3[0].weight_quantizer.step_size).to(torch.int8)
-        params["conv3.1.weight"] = torch.round(params["conv3.1.weight"] / self.conv3[1].weight_quantizer.step_size).to(torch.int8)
-        params["fc.1.weight"] = torch.round(params["fc.1.weight"] / self.fc[1].weight_quantizer.step_size).to(torch.int8)
+        steps_dict = {
+            "conv1.0.weight": self.conv1[0].weight_quantizer.step_size,
+            "conv1.1.weight": self.conv1[1].weight_quantizer.step_size,
+            "conv2.0.weight": self.conv2[0].weight_quantizer.step_size,
+            "conv2.1.weight": self.conv2[1].weight_quantizer.step_size,
+            "conv3.0.weight": self.conv3[0].weight_quantizer.step_size,
+            "conv3.1.weight": self.conv3[1].weight_quantizer.step_size,
+            "fc.1.weight": self.fc[1].weight_quantizer.step_size,
+        }
+        params["conv1.0.weight"] = torch.round(params["conv1.0.weight"] / steps_dict["conv1.0.weight"]).to(torch.int8)
+        params["conv1.1.weight"] = torch.round(params["conv1.1.weight"] / steps_dict["conv1.1.weight"]).to(torch.int8)
+        params["conv2.0.weight"] = torch.round(params["conv2.0.weight"] / steps_dict["conv2.0.weight"]).to(torch.int8)
+        params["conv2.1.weight"] = torch.round(params["conv2.1.weight"] / steps_dict["conv2.1.weight"]).to(torch.int8)
+        params["conv3.0.weight"] = torch.round(params["conv3.0.weight"] / steps_dict["conv3.0.weight"]).to(torch.int8)
+        params["conv3.1.weight"] = torch.round(params["conv3.1.weight"] / steps_dict["conv3.1.weight"]).to(torch.int8)
+        params["fc.1.weight"] = torch.round(params["fc.1.weight"] / steps_dict["fc.1.weight"]).to(torch.int8)
         
-        self.load_state_dict(params)
-        torch.save(params, "cnn_quant_weights.pth")
+        torch.save(params, f"{dirname}/weights/cnn_quant_weights.pth")
+        torch.save(steps_dict, f"{dirname}/weights/cnn_quant_steps.pth")
 
 
 class GestureDataset(Dataset) :
@@ -188,7 +197,8 @@ def train(model, train_loader, optimizer, num_epochs):
 
     utils.plot_curves(train_losses, train_accuracies)
 
-def test(model, test_loader, extra_preprocess=False) -> float:
+@torch.inference_mode()
+def test(model, test_loader, int8=False) -> float:
     model.eval()
     correct, total = 0, 0
 
@@ -196,8 +206,8 @@ def test(model, test_loader, extra_preprocess=False) -> float:
         X = X.to(device)
         y = y.to(device)
 
-        if extra_preprocess == True:
-            X = to_int_8(X)
+        if int8 == True:
+            X = (X * 255 - 128).clamp(-128, 127).to(torch.int8)
 
         predicted = model(X)
         predicted = predicted.argmax(dim=1)
@@ -208,52 +218,52 @@ def test(model, test_loader, extra_preprocess=False) -> float:
     print(f"Test Accuracy: {100 * correct / total:.2f}%")
     return 100 * correct / total
 
-def to_int_8(x):
-    return (x * 255 - 128).clamp(-128, 127).to(torch.int8)
+def get_args_parser():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--num_epochs", default=10, type=int, help="number of epochs")
+    parser.add_argument("--lr", type=float, default=0.001, help="learning rate")
+
+    return parser
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--epochs", type=int, default=10)
-    parser.add_argument("--batch_size", type=int, default=128)
-    parser.add_argument("--train", type=int, default=1)
-
-
-    epochs = parser.parse_args().epochs
-    batch_size = parser.parse_args().batch_size
-    training = parser.parse_args().train
-
+    parser = get_args_parser()
     args = parser.parse_args()
+
     train_loader, test_loader = dataset()
-
-    model = cnn.CNN(1, num_classes)
+    
+    model = cnn.CNN()
     model.to(device)
-    model.load_state_dict(torch.load("asl.pth"))
-
+    model.load_state_dict(torch.load(f"{dirname}/weights/asl.pth"))
     test(model, test_loader)
-    print(utils.get_file_size("asl.pth"))
 
-    quant_model = CNN_Quantized(model, 8)
+    quant_model = CNN_Quantized(model)
     quant_model.to(device)
 
-    if os.path.exists("asl.pth"):
-        if os.path.exists("asl_quant.pth"):
-            quant_model.load_state_dict(torch.load("asl_quant.pth"))
-        else:
-            train_optimizer = torch.optim.Adam(quant_model.parameters(), lr=1e-3)
-            train(quant_model, train_loader, train_optimizer, epochs)
-            print(summary(quant_model, (1, 28, 28)))
-            torch.save(quant_model.state_dict(), "asl_quant.pth")
-        
-        print(utils.get_file_size("asl_quant.pth"))
-        test(quant_model, test_loader)
-
-        quant_model.change_datatype()
-        print(utils.get_file_size("cnn_quant_weights.pth"))
-        test(quant_model, test_loader, extra_preprocess=True)
-
+    if os.path.exists(f"{dirname}/weights/asl_quant.pth"):
+        quant_model.load_state_dict(torch.load(f"{dirname}/weights/asl_quant.pth"))
     else:
-        optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
-        print(summary(model, (1, 28, 28)))
-        train(model, train_loader, optimizer, num_epochs=epochs)
-        test(model, test_loader, extra_preprocess=True)
-        torch.save(model.state_dict(), "asl.pth")
+        train(quant_model, train_loader, torch.optim.Adam(quant_model.parameters(), lr=args.lr), args.num_epochs)
+        torch.save(quant_model.state_dict(), f"{dirname}/weights/asl_quant.pth")
+    test(quant_model, test_loader)
+
+    quant_model.change_datatype()
+    print("Accuracy after quantization and change datatype: ")
+
+    state_dict = torch.load(f"{dirname}/weights/cnn_quant_weights.pth")
+    steps = torch.load(f"{dirname}/weights/cnn_quant_steps.pth")
+
+    for key in state_dict.keys():
+        if "weight" in key:
+            state_dict[key] = state_dict[key] * steps[key]
+    quant_model.load_state_dict(state_dict)
+    test(quant_model, test_loader)
+
+    weight_quantized = utils.get_file_size(f"{dirname}/weights/cnn_quant_weights.pth")
+    steps_quantized = utils.get_file_size(f"{dirname}/weights/cnn_quant_steps.pth")
+    
+    size_original = utils.get_file_size(f"{dirname}/weights/asl.pth")
+    size_quantized = weight_quantized + steps_quantized
+
+    print("Before:  ", size_original)
+    print("Quant:   ", size_quantized)
+    print("Ratio:   ", size_quantized / size_original * 100)
