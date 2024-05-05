@@ -226,7 +226,6 @@ if __name__ == "__main__":
         train(quant_model, train_loader, torch.optim.Adam(quant_model.parameters(), lr=args.lr), args.num_epochs)
         torch.save(quant_model.state_dict(), f"{dirname}/weights/asl_quant.pth")
         print("Training time: ", time.time() - start_time)
-    test(quant_model, test_loader)
 
     quant_model.change_datatype()
     print("Accuracy after quantization and change datatype: ")
