@@ -7,7 +7,9 @@ import numpy as np
 import torch
 import torch.nn as nn
 from torchprofile import profile_macs
+import cnn as cnn
 
+dir_path = os.path.dirname(os.path.realpath(__file__))
 
 def calculate_accuracy(y_pred, y):
     _, predicted = torch.max(y_pred, 1)
@@ -71,7 +73,7 @@ def evaluate(
 
 
 @torch.no_grad()
-def sensitivity_scan(model, test_loader, scan_step=0.1, scan_start=0.4, scan_end=1.0, verbose=False):
+def sensitivity_scan(model, dataloader, scan_step=0.1, scan_start=0.4, scan_end=1.0, verbose=True):
     sparsities = np.arange(start=scan_start, stop=scan_end, step=scan_step)
     accuracies = []
     named_conv_weights = [(name, param) for (name, param) \
@@ -81,32 +83,28 @@ def sensitivity_scan(model, test_loader, scan_step=0.1, scan_start=0.4, scan_end
         accuracy = []
         for sparsity in sparsities:
             fine_grained_prune(param.detach(), sparsity=sparsity)
-            acc = evaluate(model, test_loader)
+            acc = cnn.test(model, dataloader)
             if verbose:
-                print(f'\r    sparsity={sparsity:.2f}: accuracy={acc:.2f}%', end='')
+                print(f'sparsity={sparsity:.4f}: accuracy={acc:.4f}% ', end='\n')
             # restore
             param.copy_(param_clone)
             accuracy.append(acc)
-        if verbose:
-            print(
-                f'\r    sparsity=[{",".join(["{:.2f}".format(x) for x in sparsities])}]: accuracy=[{", ".join(["{:.2f}%".format(x) for x in accuracy])}]',
-                end='')
         accuracies.append(accuracy)
     return sparsities, accuracies
 
 
 def plot_sensitivity_scan(model, sparsities, accuracies, dense_model_accuracy):
     lower_bound_accuracy = 100 - (100 - dense_model_accuracy) * 1.5
-    fig, axes = plt.subplots(3, int(math.ceil(len(accuracies) / 3)), figsize=(15, 8))
+    fig, axes = plt.subplots(3, int(math.ceil(len(accuracies) / 3)),figsize=(15,8))
     axes = axes.ravel()
     plot_index = 0
     for name, param in model.named_parameters():
         if param.dim() > 1:
             ax = axes[plot_index]
+            print("accuracies: ",accuracies[plot_index], name)
             curve = ax.plot(sparsities, accuracies[plot_index])
             line = ax.plot(sparsities, [lower_bound_accuracy] * len(sparsities))
-            ax.set_xticks(np.arange(start=0.4, stop=1.0, step=0.1))
-            ax.set_ylim(80, 95)
+            ax.set_xticks(np.arange(start=0, stop=1.0, step=0.1))
             ax.set_title(name)
             ax.set_xlabel('sparsity')
             ax.set_ylabel('top-1 accuracy')
@@ -119,8 +117,8 @@ def plot_sensitivity_scan(model, sparsities, accuracies, dense_model_accuracy):
     fig.suptitle('Sensitivity Curves: Validation Accuracy vs. Pruning Sparsity')
     fig.tight_layout()
     fig.subplots_adjust(top=0.925)
+    plt.savefig(os.path.join(dir_path, 'graphs/sensitivity_scan.png'))
     plt.show()
-
 
 def fine_grained_prune(tensor: torch.Tensor, sparsity: float) -> torch.Tensor:
     sparsity = np.clip(sparsity, 0.0, 1.0)
@@ -148,6 +146,7 @@ def plot_num_parameters_distribution(model):
     for name, param in model.named_parameters():
         if param.dim() > 1:
             num_parameters[name] = param.numel()
+    print(num_parameters)
     fig = plt.figure(figsize=(8, 6))
     plt.grid(axis='y')
     plt.bar(list(num_parameters.keys()), list(num_parameters.values()))
@@ -155,6 +154,7 @@ def plot_num_parameters_distribution(model):
     plt.ylabel('Number of Parameters')
     plt.xticks(rotation=60)
     plt.tight_layout()
+    plt.savefig(os.path.join(dir_path, 'graphs/num_parameters_distribution.png'))
     plt.show()
 
 

@@ -14,9 +14,19 @@ import argparse
 import LSQ
 import cnn
 
-batch_size = 128
+parser = argparse.ArgumentParser()
+parser.add_argument("--num_epochs", default=10, type=int, help="number of epochs")
+parser.add_argument("--lr", type=float, default=0.001, help="learning rate")
+parser.add_argument("--batch_size", type=int, default=128, help="batch size")
+parser.add_argument("--train", action=argparse.BooleanOptionalAction, default=False, help="train the model")
+
+args = parser.parse_args()
 num_classes = 26
+
 epochs = 10
+lr = 0.001
+batch_size = 128
+
 dirname = os.path.dirname(__file__)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -27,56 +37,28 @@ class CNN_Quantized(nn.Module):
         self.criterion = nn.CrossEntropyLoss()
 
         self.conv1 = nn.Sequential(
-            LSQ.Conv2d(
-                model.conv1[0],
-                LSQ.Quantizer(8, True),
-                LSQ.Quantizer(8, False),
-            ),
-            LSQ.BatchNorm2d(
-                model.conv1[1],
-                LSQ.Quantizer(8, True),
-                LSQ.Quantizer(8, False),
-            ),
+            LSQ.Conv2d( model.conv1[0], LSQ.Quantizer(8, True), LSQ.Quantizer(8, False)),
+            LSQ.BatchNorm2d( model.conv1[1], LSQ.Quantizer(8, True), LSQ.Quantizer(8, False)),
             nn.LeakyReLU(inplace=True)
         )
 
         self.conv2 = nn.Sequential(
-            LSQ.Conv2d(
-                model.conv2[0],
-                LSQ.Quantizer(8, True),
-                LSQ.Quantizer(8, False),
-            ),
-            LSQ.BatchNorm2d(
-                model.conv2[1],
-                LSQ.Quantizer(8, True),
-                LSQ.Quantizer(8, False),
-            ),
+            LSQ.Conv2d( model.conv2[0], LSQ.Quantizer(8, True), LSQ.Quantizer(8, False)),
+            LSQ.BatchNorm2d( model.conv2[1], LSQ.Quantizer(8, True), LSQ.Quantizer(8, False)),
             nn.LeakyReLU(inplace=True),
             nn.MaxPool2d(2),
         )
         
         self.conv3 = nn.Sequential(
-            LSQ.Conv2d(
-                model.conv3[0],
-                LSQ.Quantizer(8, True),
-                LSQ.Quantizer(8, False),
-            ),
-            LSQ.BatchNorm2d(
-                model.conv3[1],
-                LSQ.Quantizer(8, True),
-                LSQ.Quantizer(8, False),
-            ),
+            LSQ.Conv2d(model.conv3[0], LSQ.Quantizer(8, True), LSQ.Quantizer(8, False)),
+            LSQ.BatchNorm2d(model.conv3[1], LSQ.Quantizer(8, True), LSQ.Quantizer(8, False)),
             nn.LeakyReLU(inplace=True),
             nn.MaxPool2d(2),
         )
 
         self.fc = nn.Sequential(
             nn.Flatten(),
-            LSQ.Linear(
-                model.fc[1],
-                LSQ.Quantizer(8, True),
-                LSQ.Quantizer(8, False),
-            ),
+            LSQ.Linear(model.fc[1], LSQ.Quantizer(8, True), LSQ.Quantizer(8, False)),
         )
 
     def forward(self, img):
@@ -92,8 +74,26 @@ class CNN_Quantized(nn.Module):
         return loss
 
     @torch.no_grad()
+    def magnitude_prune(self, sparsity_dict):
+        new_params = self.state_dict()
+        masks = {}
+        for name, param in self.named_parameters():
+            if param.dim() > 1 and "weight" in name:
+                masks[name] = utils.fine_grained_prune(param, sparsity_dict[name])
+
+        for name, param in self.named_parameters():
+            if name in masks:
+                new_params[name] = param * masks[name]
+            if "bias" in name:
+                new_params[name] = param
+        self.load_state_dict(new_params)
+
+        torch.save(new_params, f"{dirname}/weights/cnn_pruned_weights.pth")
+
+    @torch.no_grad()
     def change_datatype(self):
         params = self.state_dict()
+        
         steps_dict = {
             "conv1.0.weight": self.conv1[0].weight_quantizer.step_size,
             "conv1.1.weight": self.conv1[1].weight_quantizer.step_size,
@@ -103,13 +103,10 @@ class CNN_Quantized(nn.Module):
             "conv3.1.weight": self.conv3[1].weight_quantizer.step_size,
             "fc.1.weight": self.fc[1].weight_quantizer.step_size,
         }
-        params["conv1.0.weight"] = torch.round(params["conv1.0.weight"] / steps_dict["conv1.0.weight"]).to(torch.int8)
-        params["conv1.1.weight"] = torch.round(params["conv1.1.weight"] / steps_dict["conv1.1.weight"]).to(torch.int8)
-        params["conv2.0.weight"] = torch.round(params["conv2.0.weight"] / steps_dict["conv2.0.weight"]).to(torch.int8)
-        params["conv2.1.weight"] = torch.round(params["conv2.1.weight"] / steps_dict["conv2.1.weight"]).to(torch.int8)
-        params["conv3.0.weight"] = torch.round(params["conv3.0.weight"] / steps_dict["conv3.0.weight"]).to(torch.int8)
-        params["conv3.1.weight"] = torch.round(params["conv3.1.weight"] / steps_dict["conv3.1.weight"]).to(torch.int8)
-        params["fc.1.weight"] = torch.round(params["fc.1.weight"] / steps_dict["fc.1.weight"]).to(torch.int8)
+        
+        for key in steps_dict.keys():
+            if "weight" in key:
+                params[key] = torch.round(params[key] / steps_dict[key]).to(torch.int8)
         
         torch.save(params, f"{dirname}/weights/cnn_quant_weights.pth")
         torch.save(steps_dict, f"{dirname}/weights/cnn_quant_steps.pth")
@@ -218,19 +215,9 @@ def test(model, test_loader, int8=False) -> float:
     print(f"Test Accuracy: {100 * correct / total:.2f}%")
     return 100 * correct / total
 
-def get_args_parser():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--num_epochs", default=10, type=int, help="number of epochs")
-    parser.add_argument("--lr", type=float, default=0.001, help="learning rate")
-
-    return parser
-
 if __name__ == "__main__":
-    parser = get_args_parser()
-    args = parser.parse_args()
-
     train_loader, test_loader = dataset()
-    
+
     model = cnn.CNN()
     model.to(device)
     model.load_state_dict(torch.load(f"{dirname}/weights/asl.pth"))
@@ -260,10 +247,21 @@ if __name__ == "__main__":
 
     weight_quantized = utils.get_file_size(f"{dirname}/weights/cnn_quant_weights.pth")
     steps_quantized = utils.get_file_size(f"{dirname}/weights/cnn_quant_steps.pth")
-    
+
     size_original = utils.get_file_size(f"{dirname}/weights/asl.pth")
     size_quantized = weight_quantized + steps_quantized
 
     print("Before:  ", size_original)
     print("Quant:   ", size_quantized)
     print("Ratio:   ", size_quantized / size_original * 100)
+
+    sparsity_dict = {
+        "conv1.0.weight": 0.12,
+        "conv2.0.weight": 0.72,
+        "conv3.0.weight": 0.75,
+        "fc.1.weight": 0.76,
+    }
+    quant_model.magnitude_prune(sparsity_dict)
+
+    print("Accuracy after magnitude pruning: ")
+    test(quant_model, test_loader)
