@@ -220,7 +220,11 @@ if __name__ == "__main__":
 
     model = cnn.CNN()
     model.to(device)
-    model.load_state_dict(torch.load(f"{dirname}/weights/asl.pth"))
+    if os.path.exists(f"{dirname}/weights/asl.pth"):
+        model.load_state_dict(torch.load(f"{dirname}/weights/asl.pth"))
+    else:
+        train(model, train_loader, torch.optim.Adam(model.parameters(), lr=args.lr), args.num_epochs)
+        torch.save(model.state_dict(), f"{dirname}/weights/asl.pth")
     test(model, test_loader)
 
     quant_model = CNN_Quantized(model)
@@ -257,9 +261,9 @@ if __name__ == "__main__":
 
     sparsity_dict = {
         "conv1.0.weight": 0.12,
-        "conv2.0.weight": 0.72,
-        "conv3.0.weight": 0.75,
-        "fc.1.weight": 0.76,
+        "conv2.0.weight": 0.71,
+        "conv3.0.weight": 0.4,
+        "fc.1.weight": 0.74,
     }
     quant_model.magnitude_prune(sparsity_dict)
 
