@@ -6,6 +6,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import Dataset
+from torchsummary import summary
 from torchvision.transforms import v2 as T
 
 import utils
