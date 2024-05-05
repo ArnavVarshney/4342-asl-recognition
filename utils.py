@@ -7,9 +7,9 @@ import numpy as np
 import torch
 import torch.nn as nn
 from torchprofile import profile_macs
-import cnn as cnn
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def calculate_accuracy(y_pred, y):
     _, predicted = torch.max(y_pred, 1)
@@ -46,32 +46,6 @@ def plot_curves(train_losses, train_accuracies):
 def get_file_size(filename) -> int:
     return os.path.getsize(filename) / 1e3
 
-
-@torch.inference_mode()
-def evaluate(
-        model,
-        dataloader,
-        verbose=True,
-) -> float:
-    model.eval()
-
-    num_samples = 0
-    num_correct = 0
-
-    for inputs, targets in dataloader:
-        inputs = inputs.cuda()
-        targets = targets.cuda()
-
-        outputs = model(inputs)
-
-        outputs = outputs.argmax(dim=1)
-
-        num_samples += targets.size(0)
-        num_correct += (outputs == targets).sum()
-
-    return (num_correct / num_samples * 100).item()
-
-
 @torch.no_grad()
 def sensitivity_scan(model, dataloader, scan_step=0.1, scan_start=0.4, scan_end=1.0, verbose=True):
     sparsities = np.arange(start=scan_start, stop=scan_end, step=scan_step)
@@ -83,7 +57,7 @@ def sensitivity_scan(model, dataloader, scan_step=0.1, scan_start=0.4, scan_end=
         accuracy = []
         for sparsity in sparsities:
             fine_grained_prune(param.detach(), sparsity=sparsity)
-            acc = cnn.test(model, dataloader)
+            acc = test(model, dataloader)
             if verbose:
                 print(f'sparsity={sparsity:.4f}: accuracy={acc:.4f}% ', end='\n')
             # restore
@@ -209,14 +183,61 @@ def get_num_parameters(model: nn.Module, count_nonzero_only=False) -> int:
 def get_model_size(model: nn.Module, data_width=32, count_nonzero_only=False) -> int:
     return get_num_parameters(model, count_nonzero_only) * data_width
 
+def train(model, train_loader, optimizer, num_epochs):
+    train_losses = []
+    train_accuracies = []
 
-def measure(model, loader):
-    dummy_input, _ = next(iter(loader))
+    for epoch in range(num_epochs):
+        total_loss = 0
+        total_correct = 0
+        total_samples = 0
 
-    size = get_model_size(model=model, count_nonzero_only=True) / (8 * 2 ** 10)
-    latency = measure_latency(model, dummy_input)
-    macs = get_model_macs(model, dummy_input)
-    param = get_num_parameters(model, count_nonzero_only=True)
-    accuracy = evaluate(model, loader)
+        for batch, (X, y) in enumerate(train_loader):
+            X = X.to(device)
+            y = y.to(device)
 
-    return size.item(), latency, param, macs, accuracy
+            y_pred = model(X)
+            loss = model.loss(y_pred, y.squeeze())
+            total_loss += loss.item()
+
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+
+            train_accuracy = calculate_accuracy(y_pred, y.squeeze())
+            total_correct += train_accuracy * y.size(0)
+            total_samples += y.size(0)
+
+            print(f"Epoch [{epoch + 1}], Step [{batch + 1}], Loss: {loss.item():.4f}", end="\r", )
+
+        avg_loss = total_loss / len(train_loader)
+        train_losses.append(avg_loss)
+
+        train_accuracy = total_correct / total_samples
+        train_accuracies.append(train_accuracy)
+
+        print(f"\nEpoch [{epoch + 1}], Average Loss: {avg_loss:.4f}, Accuracy: {train_accuracy:.2f}%")
+
+    plot_curves(train_losses, train_accuracies)
+
+
+@torch.inference_mode()
+def test(model, test_loader, int8=False) -> float:
+    model.eval()
+    correct, total = 0, 0
+
+    for X, y in test_loader:
+        X = X.to(device)
+        y = y.to(device)
+
+        if int8:
+            X = (X * 255 - 128).clamp(-128, 127).to(torch.int8)
+
+        predicted = model(X)
+        predicted = predicted.argmax(dim=1)
+
+        total += y.size(0)
+        correct += (predicted == y.squeeze()).sum().item()
+
+    print(f"Test Accuracy: {100 * correct / total:.2f}%")
+    return 100 * correct / total
