@@ -14,25 +14,25 @@ class Quantizer(nn.Module):
             self.q_min = 0
             self.q_max = 2**bits - 1
 
-        self.step_size = None
+        self.step_size = torch.tensor(0.0)
 
-    def init_step_size(self, x):
+    def init_step_size(self, x: torch.Tensor):
         self.step_size = 2 * x.detach().abs().mean() / math.sqrt(self.q_max)
 
-    def gradscale(self, x, scale):
+    def gradscale(self, x: torch.Tensor, scale: float) -> torch.Tensor:
         y_out = x
         y_grad = x * scale
         y = torch.detach(y_out - y_grad) + y_grad
         return y
 
-    def roundpass(self, x):
+    def roundpass(self, x: torch.Tensor) -> torch.Tensor:
         y_out = torch.round(x)
         y_grad = x
         y = torch.detach(y_out - y_grad) + y_grad
         return y
 
-    def forward(self, x):
-        if self.step_size is None:
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        if self.step_size == 0:
             self.init_step_size(x)
 
         scale_factor = 1 / math.sqrt(len(torch.flatten(x)) * self.q_max)
