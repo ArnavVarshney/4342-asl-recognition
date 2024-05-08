@@ -24,7 +24,7 @@ def calculate_compression_rate(X, step_size):
     return original_size / quantized_size
 
 
-def plot_curves(train_losses, train_accuracies):
+def plot_curves(train_losses, train_accuracies, model_name=""):
     plt.figure(figsize=(12, 6))
     plt.subplot(1, 2, 1)
     plt.plot(train_losses, color='blue')
@@ -40,8 +40,7 @@ def plot_curves(train_losses, train_accuracies):
     plt.xlabel('Epoch')
     plt.ylabel('Accuracy (%)')
     plt.tight_layout()
-    plt.show()
-
+    plt.savefig(os.path.join(dir_path, f'graphs/{model_name}'))
 
 def get_file_size(filename) -> int:
     return os.path.getsize(filename) / 1e3
@@ -218,7 +217,7 @@ def train(model, train_loader, optimizer, num_epochs):
 
         print(f"\nEpoch [{epoch + 1}], Average Loss: {avg_loss:.4f}, Accuracy: {train_accuracy:.2f}%")
 
-    plot_curves(train_losses, train_accuracies)
+    plot_curves(train_losses, train_accuracies, model.__class__.__name__)
 
 
 @torch.inference_mode()
