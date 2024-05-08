@@ -52,7 +52,6 @@ class CNN(nn.Module):
         img = self.conv2(img)
         img = self.conv3(img)
         img = self.fc(img)
-        img = F.log_softmax(img, dim=1)
         return img
 
     def loss(self, x, label):
