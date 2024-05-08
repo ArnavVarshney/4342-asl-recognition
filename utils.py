@@ -106,7 +106,7 @@ def fine_grained_prune(tensor: torch.Tensor, sparsity: float) -> torch.Tensor:
 
     num_zeros = round(num_elements * sparsity)
     importance = torch.square(tensor)
-    threshold = importance.view(-1).kthvalue(num_zeros).values
+    threshold = importance.view(-1).kthvalue(num_zeros).values + 1e-8
     mask = torch.gt(importance, threshold)
 
     tensor.mul_(mask)

@@ -141,7 +141,7 @@ if __name__ == "__main__":
     quant_model.to(device)
 
     start_time = time.time()
-    if os.path.exists(f"{dirname}/weights/asl_quant.pth") and not args.train:
+    if os.path.exists(f"{dirname}/weights/asl_quant.pth"):
         quant_model.load_state_dict(torch.load(f"{dirname}/weights/asl_quant.pth"))
         quant_model.eval()
         print(summary(quant_model, (1, 28, 28)))
