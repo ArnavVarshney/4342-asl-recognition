@@ -6,8 +6,10 @@ import tvm
 from tvm import relay
 
 import cnn
+from utils import get_project_root
 
-dirname = os.path.dirname(__file__)
+root = get_project_root()
+dirname = root + "/tvm_deployment"
 device = torch.device("cpu")
 
 if not os.path.exists(f"{dirname}/tvm_out"):
@@ -15,7 +17,7 @@ if not os.path.exists(f"{dirname}/tvm_out"):
 
 model = cnn.CNN()
 model.to(device)
-model.load_state_dict(torch.load(f"{dirname}/weights/asl.pth"))
+model.load_state_dict(torch.load(f"{root}/weights/asl.pth"))
 
 torch.onnx.export(model, torch.randn(128, 1, 28, 28), f"{dirname}/tvm_out/model.onnx")
 onnx_model = onnx.load(f"{dirname}/tvm_out/model.onnx")

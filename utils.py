@@ -228,3 +228,7 @@ def test(model, test_loader, int8=False) -> float:
 
     print(f"Test Accuracy: {100 * correct / total:.2f}%")
     return 100 * correct / total
+
+
+def get_project_root():
+    return os.path.dirname(__file__)
