@@ -82,7 +82,7 @@ if __name__ == "__main__":
     model = CNN()
     model.to(device)
 
-    if os.path.exists(f"{dirname}/weights/asl.pth") and args.train:
+    if os.path.exists(f"{dirname}/weights/asl.pth"):
         model.load_state_dict(torch.load(f"{dirname}/weights/asl.pth"))
         model.eval()
         print(summary(model, (1, 28, 28)))
