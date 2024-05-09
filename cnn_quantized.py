@@ -163,7 +163,7 @@ if __name__ == "__main__":
 
     print(f"Before: {size_original} bytes, Quant: {size_quantized} bytes, Ratio: {size_quantized / size_original * 100:.2f}%")
 
-    sparsity_dict = {"conv1.0.weight": 0.12, "conv2.0.weight": 0.70, "conv3.0.weight": 0.6, "fc.1.weight": 0.74, }
+    sparsity_dict = {"conv1.0.weight": 0.1, "conv2.0.weight": 0.50, "conv3.0.weight": 0.6, "fc.1.weight": 0.70, }
     quant_model.magnitude_prune(sparsity_dict)
 
     print("Accuracy after magnitude pruning: ")
