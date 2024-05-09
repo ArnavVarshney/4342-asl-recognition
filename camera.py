@@ -34,7 +34,7 @@ fps = 0
 while True:
     ret, frame = cap.read()
 
-    if not ret:
+    if not ret or frame is None:
         continue
 
     roi = frame[top:bot, right:left]
@@ -43,11 +43,15 @@ while True:
 
     roi = np.reshape(roi, (1, 1, 28, 28))
     roi = torch.from_numpy(roi).type(torch.FloatTensor)
+    roi /= 255
 
     outputs = model(roi)
     conf, predicted = torch.max(outputs.squeeze(), 0)
+    conf = torch.nn.functional.softmax(outputs, dim=1)[0][predicted] * 100
     predicted_class = classnames[predicted.item()]
     confidence = conf.item()
+
+    roi = roi.squeeze().numpy()
 
     frame = cv2.putText(frame, f"FPS: {fps:.2f}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 0, 255), 2)
     frame = cv2.putText(frame, f"Confidence: {confidence:.2f}%", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 0, 255), 2)
@@ -55,7 +59,7 @@ while True:
     frame = cv2.rectangle(frame, (left, top), (right, bot), (255, 0, 255), 2)
 
     cv2.imshow("Frame", frame)
-    cv2.imshow("ROI", roi.squeeze().numpy())
+    cv2.imshow("ROI", roi)
 
     fps_count += 1
     if cv2.getTickCount() - fps_start >= cv2.getTickFrequency():
