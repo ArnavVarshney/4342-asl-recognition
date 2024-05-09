@@ -1,6 +1,3 @@
 __pycache__
 __pycache__/**
 .vscode
-weights
-graphs
-ncnn_out
