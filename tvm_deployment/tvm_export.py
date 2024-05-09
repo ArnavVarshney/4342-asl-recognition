@@ -29,7 +29,8 @@ print(input_shape)
 mod, params = relay.frontend.from_onnx(onnx_model, shape_dict)
 
 with tvm.transform.PassContext(opt_level=3):
-    graph_module = relay.build(mod, target="llvm", params=params)
+    # graph_module = relay.build(mod, target="llvm", params=params)
+    graph_module = relay.build(mod, target=tvm.target.arm_cpu("rpi4b64"), params=params)
 
 graph = graph_module.get_graph_json()
 lib = graph_module.get_lib()
