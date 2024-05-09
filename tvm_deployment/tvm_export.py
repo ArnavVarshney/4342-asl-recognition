@@ -1,9 +1,9 @@
+import os
+
+import onnx
+import torch
 import tvm
 from tvm import relay
-import onnx
-
-import torch
-import os
 
 import cnn
 

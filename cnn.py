@@ -3,7 +3,6 @@ import os
 
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 from torchsummary import summary
 
 import GestureDataset
@@ -52,11 +51,12 @@ class CNN(nn.Module):
         img = self.conv2(img)
         img = self.conv3(img)
         img = self.fc(img)
-        return img
+        return img.to(device)
 
     def loss(self, x, label):
         loss = self.criterion(x, label)
         return loss
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -72,15 +72,15 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    train_loader, test_loader = GestureDataset.dataset(os.path.join(dirname, 'mnist-sign-language/train/sign_mnist_train.csv'), 
-                                                       os.path.join(dirname, 'mnist-sign-language/test/sign_mnist_test.csv'), 
-                                                       args.batch_size)
-    
+    train_loader, test_loader = GestureDataset.dataset(
+        os.path.join(dirname, 'mnist-sign-language/train/sign_mnist_train.csv'),
+        os.path.join(dirname, 'mnist-sign-language/test/sign_mnist_test.csv'),
+        args.batch_size)
+
     if not os.path.exists(f"{dirname}/weights"):
         os.makedirs(f"{dirname}/weights")
 
-    model = CNN()
-    model.to(device)
+    model = CNN().to(device)
 
     if os.path.exists(f"{dirname}/weights/asl.pth"):
         model.load_state_dict(torch.load(f"{dirname}/weights/asl.pth"))

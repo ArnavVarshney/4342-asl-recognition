@@ -1,6 +1,8 @@
+import math
+
 import torch
 import torch.nn as nn
-import math
+
 
 class Quantizer(nn.Module):
     def __init__(self, bits, is_weight):
@@ -12,7 +14,7 @@ class Quantizer(nn.Module):
             self.q_max = 2 ** (bits - 1) - 1
         else:
             self.q_min = 0
-            self.q_max = 2**bits - 1
+            self.q_max = 2 ** bits - 1
 
         self.step_size = torch.tensor(0.0)
 
@@ -100,7 +102,7 @@ class Linear(nn.Linear):
         quantized_activation = self.activation_quantizer(x)
 
         return nn.functional.linear(quantized_activation, quantized_weight, self.bias)
-    
+
 
 class BatchNorm2d(nn.BatchNorm2d):
     def __init__(self, model, weight_quantizer, activation_quantizer, bits=8):
@@ -111,7 +113,7 @@ class BatchNorm2d(nn.BatchNorm2d):
             model.affine,
             model.track_running_stats
         )
-        
+
         self.weight = nn.Parameter(model.weight.detach())
         self.bits = bits
 
@@ -119,11 +121,11 @@ class BatchNorm2d(nn.BatchNorm2d):
         self.activation_quantizer = activation_quantizer
 
         self.weight_quantizer.init_step_size(model.weight)
-        
+
     def forward(self, x):
         quantized_weight = self.weight_quantizer(self.weight)
         quantized_activation = self.activation_quantizer(x)
-        
+
         return nn.functional.batch_norm(
             quantized_activation,
             self.running_mean,

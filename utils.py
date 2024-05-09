@@ -11,6 +11,7 @@ from torchprofile import profile_macs
 dir_path = os.path.dirname(os.path.realpath(__file__))
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+
 def calculate_accuracy(y_pred, y):
     _, predicted = torch.max(y_pred, 1)
     correct = (predicted == y).sum().item()
@@ -42,15 +43,16 @@ def plot_curves(train_losses, train_accuracies, model_name=""):
     plt.tight_layout()
     plt.savefig(os.path.join(dir_path, f'graphs/{model_name}'))
 
-def get_file_size(filename) -> int:
+
+def get_file_size(filename) -> float:
     return os.path.getsize(filename) / 1e3
+
 
 @torch.no_grad()
 def sensitivity_scan(model, dataloader, scan_step=0.1, scan_start=0.4, scan_end=1.0, verbose=True):
     sparsities = np.arange(start=scan_start, stop=scan_end, step=scan_step)
     accuracies = []
-    named_conv_weights = [(name, param) for (name, param) \
-                          in model.named_parameters() if param.dim() > 1]
+    named_conv_weights = [(name, param) for (name, param) in model.named_parameters() if param.dim() > 1]
     for i_layer, (name, param) in enumerate(named_conv_weights):
         param_clone = param.detach().clone()
         accuracy = []
@@ -68,23 +70,21 @@ def sensitivity_scan(model, dataloader, scan_step=0.1, scan_start=0.4, scan_end=
 
 def plot_sensitivity_scan(model, sparsities, accuracies, dense_model_accuracy):
     lower_bound_accuracy = 100 - (100 - dense_model_accuracy) * 1.5
-    fig, axes = plt.subplots(3, int(math.ceil(len(accuracies) / 3)),figsize=(15,8))
+    fig, axes = plt.subplots(3, int(math.ceil(len(accuracies) / 3)), figsize=(15, 8))
     axes = axes.ravel()
     plot_index = 0
     for name, param in model.named_parameters():
         if param.dim() > 1:
             ax = axes[plot_index]
-            print("accuracies: ",accuracies[plot_index], name)
-            curve = ax.plot(sparsities, accuracies[plot_index])
-            line = ax.plot(sparsities, [lower_bound_accuracy] * len(sparsities))
+            print("accuracies: ", accuracies[plot_index], name)
+            ax.plot(sparsities, accuracies[plot_index])
+            ax.plot(sparsities, [lower_bound_accuracy] * len(sparsities))
             ax.set_xticks(np.arange(start=0, stop=1.0, step=0.1))
             ax.set_title(name)
             ax.set_xlabel('sparsity')
             ax.set_ylabel('top-1 accuracy')
-            ax.legend([
-                'accuracy after pruning',
-                f'{lower_bound_accuracy / dense_model_accuracy * 100:.0f}% of dense model accuracy'
-            ])
+            ax.legend(['accuracy after pruning',
+                       f'{lower_bound_accuracy / dense_model_accuracy * 100:.0f}% of dense model accuracy'])
             ax.grid(axis='x')
             plot_index += 1
     fig.suptitle('Sensitivity Curves: Validation Accuracy vs. Pruning Sparsity')
@@ -92,6 +92,7 @@ def plot_sensitivity_scan(model, sparsities, accuracies, dense_model_accuracy):
     fig.subplots_adjust(top=0.925)
     plt.savefig(os.path.join(dir_path, 'graphs/sensitivity_scan.png'))
     plt.show()
+
 
 def fine_grained_prune(tensor: torch.Tensor, sparsity: float) -> torch.Tensor:
     sparsity = np.clip(sparsity, 0.0, 1.0)
@@ -120,7 +121,7 @@ def plot_num_parameters_distribution(model):
         if param.dim() > 1:
             num_parameters[name] = param.numel()
     print(num_parameters)
-    fig = plt.figure(figsize=(8, 6))
+    plt.figure(figsize=(8, 6))
     plt.grid(axis='y')
     plt.bar(list(num_parameters.keys()), list(num_parameters.values()))
     plt.title('Parameter Distribution')
@@ -168,19 +169,6 @@ def measure_latency(model, dummy_input, n_warmup=20, n_test=100):
 def get_model_macs(model, inputs) -> int:
     return profile_macs(model, inputs)
 
-
-def get_num_parameters(model: nn.Module, count_nonzero_only=False) -> int:
-    num_counted_elements = 0
-    for param in model.parameters():
-        if count_nonzero_only:
-            num_counted_elements += param.count_nonzero()
-        else:
-            num_counted_elements += param.numel()
-    return num_counted_elements
-
-
-def get_model_size(model: nn.Module, data_width=32, count_nonzero_only=False) -> int:
-    return get_num_parameters(model, count_nonzero_only) * data_width
 
 def train(model, train_loader, optimizer, num_epochs):
     train_losses = []

@@ -1,8 +1,8 @@
-import os
 import pandas as pd
 import torch
 from torch.utils.data import Dataset
 from torchvision.transforms import v2 as T
+
 
 class GestureDataset(Dataset):
     def __init__(self, csv_file):
@@ -30,6 +30,7 @@ class GestureDataset(Dataset):
         img = img.float()
 
         return img, label
+
 
 def dataset(train_path, test_path, batch_size=128):
     train_dataset = GestureDataset(train_path)

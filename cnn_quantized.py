@@ -4,13 +4,12 @@ import time
 
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 from torchsummary import summary
 
+import GestureDataset
 import LSQ
 import cnn
 from utils import train, test, fine_grained_prune, get_file_size
-import GestureDataset
 
 batch_size = 128
 num_classes = 26
@@ -87,7 +86,7 @@ class CNN_Quantized(nn.Module):
 
         torch.save(params, f"{dirname}/weights/cnn_quant_weights.pth")
         torch.save(steps_dict, f"{dirname}/weights/cnn_quant_steps.pth")
-    
+
     @torch.no_grad()
     def load_quantized_params(self):
         state_dict = torch.load(f"{dirname}/weights/cnn_quant_weights.pth")
@@ -97,6 +96,7 @@ class CNN_Quantized(nn.Module):
             if "weight" in key:
                 state_dict[key] = state_dict[key] * steps[key]
         self.load_state_dict(state_dict)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -112,16 +112,15 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    train_loader, test_loader = GestureDataset.dataset(os.path.join(dirname, 'mnist-sign-language/train/sign_mnist_train.csv'), 
-                                                       os.path.join(dirname, 'mnist-sign-language/test/sign_mnist_test.csv'), 
-                                                       args.batch_size)
+    train_loader, test_loader = GestureDataset.dataset(
+        os.path.join(dirname, 'mnist-sign-language/train/sign_mnist_train.csv'),
+        os.path.join(dirname, 'mnist-sign-language/test/sign_mnist_test.csv'), args.batch_size)
 
     if not os.path.exists(f"{dirname}/weights"):
         os.makedirs(f"{dirname}/weights")
-    
+
     # Original Model
-    model = cnn.CNN()
-    model.to(device)
+    model = cnn.CNN().to(device)
 
     start_time = time.time()
     if os.path.exists(f"{dirname}/weights/asl.pth"):
@@ -132,13 +131,12 @@ if __name__ == "__main__":
         print(summary(model, (1, 28, 28)))
         train(model, train_loader, torch.optim.Adam(model.parameters(), lr=1e-3), args.epochs)
         torch.save(model.state_dict(), f"{dirname}/weights/asl.pth")
-        print("Training time: ", time.time() - start_time)
+        print(f"Training time: {time.time() - start_time:.2f}s")
 
     test(model, test_loader)
 
     # Quantized Model
-    quant_model = CNN_Quantized(model)
-    quant_model.to(device)
+    quant_model = CNN_Quantized(model).to(device)
 
     start_time = time.time()
     if os.path.exists(f"{dirname}/weights/asl_quant.pth"):
@@ -149,19 +147,20 @@ if __name__ == "__main__":
         print(summary(quant_model, (1, 28, 28)))
         train(quant_model, train_loader, torch.optim.Adam(quant_model.parameters(), lr=args.lr), args.epochs)
         torch.save(quant_model.state_dict(), f"{dirname}/weights/asl_quant.pth")
-        print("Training time: ", time.time() - start_time)
+        print(f"Training time: {time.time() - start_time:.2f}s")
 
     quant_model.change_datatype()
     quant_model.load_quantized_params()
     print("Accuracy after quantization and change datatype: ")
     test(quant_model, test_loader)
 
-    size_quantized = get_file_size(f"{dirname}/weights/cnn_quant_weights.pth") \
-                     + get_file_size(f"{dirname}/weights/cnn_quant_steps.pth")
+    size_quantized = get_file_size(f"{dirname}/weights/cnn_quant_weights.pth") + get_file_size(
+        f"{dirname}/weights/cnn_quant_steps.pth")
 
     size_original = get_file_size(f"{dirname}/weights/asl.pth")
 
-    print(f"Before: {size_original} bytes, Quant: {size_quantized} bytes, Ratio: {size_quantized / size_original * 100:.2f}%")
+    print(
+        f"Before: {size_original} bytes, Quant: {size_quantized} bytes, Ratio: {size_quantized / size_original * 100:.2f}%")
 
     sparsity_dict = {"conv1.0.weight": 0.1, "conv2.0.weight": 0.50, "conv3.0.weight": 0.6, "fc.1.weight": 0.70, }
     quant_model.magnitude_prune(sparsity_dict)

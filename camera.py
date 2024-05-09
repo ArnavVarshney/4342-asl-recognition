@@ -1,7 +1,8 @@
+import os
+
 import cv2
 import numpy as np
 import torch
-import os
 
 from cnn import CNN
 
@@ -54,8 +55,10 @@ while True:
     roi = roi.squeeze().numpy()
 
     frame = cv2.putText(frame, f"FPS: {fps:.2f}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 0, 255), 2)
-    frame = cv2.putText(frame, f"Confidence: {confidence:.2f}%", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 0, 255), 2)
-    frame = cv2.putText(frame, f"Predicted: {predicted_class}", (10, 90), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 0, 255), 2)
+    frame = cv2.putText(frame, f"Confidence: {confidence:.2f}%", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 0, 255),
+                        2)
+    frame = cv2.putText(frame, f"Predicted: {predicted_class}", (10, 90), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 0, 255),
+                        2)
     frame = cv2.rectangle(frame, (left, top), (right, bot), (255, 0, 255), 2)
 
     cv2.imshow("Frame", frame)
