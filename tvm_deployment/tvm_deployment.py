@@ -4,10 +4,11 @@ import numpy as np
 import tvm
 from tvm.contrib import graph_runtime
 
-import cnn
+import GestureDataset
 
 dirname = os.path.dirname(__file__)
 lib = tvm.runtime.load_module(f"{dirname}/tvm_out/model.so")
+
 with open(f"{dirname}/tvm_out/graph.json", "r") as f:
     graph = f.read()
 with open(f"{dirname}/tvm_out/params.params", "rb") as f:
@@ -18,12 +19,15 @@ module = graph_runtime.create(graph, lib, ctx)
 
 module.load_params(params)
 
-_, test_loader = cnn.dataset()
+_, test_loader = GestureDataset.dataset(
+    os.path.join(dirname, f'../mnist-sign-language/mnist_sign_language_test.csv'),
+    os.path.join(dirname, f'../mnist-sign-language/mnist_sign_language_test.csv'),
+    1
+)
+
 correct, total = 0, 0
 
 for X, y in test_loader:
-    if X.size(0) != 128:
-        continue
     module.set_input("input.1", X.numpy())
     module.run()
 
