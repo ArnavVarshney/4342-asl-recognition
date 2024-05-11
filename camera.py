@@ -15,9 +15,9 @@ parser.add_argument("--model", type=str, default="mnist-sign-language", choices=
 args = parser.parse_args()
 
 if args.model == "mnist-sign-language":
-    classnames = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u',
-                'v', 'w', 'x', 'y', 'z']
-    model = CNN(1, 26)
+    classnames = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u',
+                'v', 'w', 'x', 'y']
+    model = CNN(1, 24)
 elif args.model == "rock-paper-scissors":
     classnames = ['Rock', 'Paper', 'Scissors', 'Empty']
     model = CNN(1, 4)

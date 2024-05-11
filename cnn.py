@@ -6,10 +6,10 @@ import torch.nn as nn
 from torchsummary import summary
 
 import GestureDataset
-from utils import train, test
+from utils import train, test, get_confusion_matrix
 
 batch_size = 128
-num_classes = 26
+num_classes = 24
 lr = 0.001
 epochs = 10
 dirname = os.path.dirname(__file__)
@@ -82,13 +82,17 @@ if __name__ == "__main__":
         os.makedirs(f"{dirname}/weights/{dataset}")
 
     if dataset == "mnist-sign-language":
-        model = CNN(1, 26).to(device)
+        model = CNN(1, 24).to(device)
+        classnames = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u',
+                    'v', 'w', 'x', 'y']
     elif dataset == "rock-paper-scissors":
         model = CNN(1, 4).to(device)
+        classnames = ['Rock', 'Paper', 'Scissors', 'Empty']
     
     if os.path.exists(f"{dirname}/weights/{dataset}/model.pth") and not training:
         model.load_state_dict(torch.load(f"{dirname}/weights/{dataset}/model.pth"))
         model.eval()
+        get_confusion_matrix(model, train_loader, device, classnames)
         print(summary(model, (1, 28, 28)))
 
     else:
