@@ -10,6 +10,7 @@ from utils import train, test
 
 batch_size = 128
 num_classes = 26
+lr = 0.001
 epochs = 10
 dirname = os.path.dirname(__file__)
 
@@ -62,33 +63,36 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--epochs", type=int, default=10)
     parser.add_argument("--batch_size", type=int, default=128)
-    parser.add_argument("--train", type=int, default=1)
+    parser.add_argument("--train", type=bool, default=False, action=argparse.BooleanOptionalAction)
     parser.add_argument("--lr", type=float, default=1e-3)
+    parser.add_argument("--dataset", type=str, default="mnist-sign-language", choices=["mnist-sign-language", "rock-paper-scissors"])
 
     epochs = parser.parse_args().epochs
     batch_size = parser.parse_args().batch_size
     training = parser.parse_args().train
     lr = parser.parse_args().lr
-
-    args = parser.parse_args()
+    dataset = parser.parse_args().dataset
 
     train_loader, test_loader = GestureDataset.dataset(
-        os.path.join(dirname, 'mnist-sign-language/train/sign_mnist_train.csv'),
-        os.path.join(dirname, 'mnist-sign-language/test/sign_mnist_test.csv'),
-        args.batch_size)
+        os.path.join(dirname, f'{dataset}/{dataset.replace("-", "_")}_train.csv'),
+        os.path.join(dirname, f'{dataset}/{dataset.replace("-", "_")}_test.csv'), 
+        batch_size)
 
-    if not os.path.exists(f"{dirname}/weights"):
-        os.makedirs(f"{dirname}/weights")
+    if not os.path.exists(f"{dirname}/weights/{dataset}"):
+        os.makedirs(f"{dirname}/weights/{dataset}")
 
-    model = CNN().to(device)
-
-    if os.path.exists(f"{dirname}/weights/asl.pth"):
-        model.load_state_dict(torch.load(f"{dirname}/weights/asl.pth"))
+    if dataset == "mnist-sign-language":
+        model = CNN(1, 26).to(device)
+    elif dataset == "rock-paper-scissors":
+        model = CNN(1, 4).to(device)
+    
+    if os.path.exists(f"{dirname}/weights/{dataset}/model.pth") and not training:
+        model.load_state_dict(torch.load(f"{dirname}/weights/{dataset}/model.pth"))
         model.eval()
         print(summary(model, (1, 28, 28)))
 
     else:
         print(summary(model, (1, 28, 28)))
-        train(model, train_loader, torch.optim.Adam(model.parameters(), lr=1e-3), num_epochs=epochs)
+        train(model, train_loader, test_loader, torch.optim.Adam(model.parameters(), lr=1e-3), num_epochs=epochs)
         test(model, test_loader)
-        torch.save(model.state_dict(), f"{dirname}/weights/asl.pth")
+        torch.save(model.state_dict(), f"{dirname}/weights/{dataset}/model.pth")

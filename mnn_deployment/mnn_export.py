@@ -16,7 +16,7 @@ if not os.path.exists(f"{dirname}/mnn_out"):
 
 model = cnn.CNN()
 model.to(device)
-model.load_state_dict(torch.load(f"{root}/weights/asl.pth"))
+model.load_state_dict(torch.load(f"{root}/weights/mnist-sign-language/model.pth"))
 
 print(f"{dirname}/mnn_out")
 torch.onnx.export(model, torch.randn(128, 1, 28, 28), f"{dirname}/mnn_out/model.onnx")

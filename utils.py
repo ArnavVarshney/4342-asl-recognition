@@ -233,7 +233,10 @@ def train(model, train_loader, val_loader, optimizer, num_epochs):
         print(f"\nEpoch [{epoch + 1}], Train Loss: {avg_train_loss:.4f}, Train Accuracy: {train_accuracy:.2f}%")
         print(f"Epoch [{epoch + 1}], Validation Loss: {avg_val_loss:.4f}, Validation Accuracy: {val_accuracy:.2f}%")
 
-        with open(os.path.join(dir_path, f'{model.__class__.__name__}.txt'), 'w') as f:
+        if not os.path.exists(os.path.join(dir_path, 'temp')):
+            os.makedirs(os.path.join(dir_path, 'temp'))
+
+        with open(os.path.join(dir_path, f'temp/{model.__class__.__name__}.txt'), 'w') as f:
             f.write(f"{train_losses}\n")
             f.write(f"{train_accuracies}\n")
             f.write(f"{val_losses}\n")

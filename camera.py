@@ -3,16 +3,26 @@ import os
 import cv2
 import numpy as np
 import torch
+import argparse
 
 from cnn import CNN
 
 dirpath = os.path.dirname(os.path.realpath(__file__))
 
-classnames = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u',
-              'v', 'w', 'x', 'y', 'z']
+parser = argparse.ArgumentParser()
+parser.add_argument("--model", type=str, default="mnist-sign-language", choices=["mnist-sign-language", "rock-paper-scissors"])
 
-model = CNN(1, 26)
-model.load_state_dict(torch.load(f'{dirpath}/weights/asl.pth'))
+args = parser.parse_args()
+
+if args.model == "mnist-sign-language":
+    classnames = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u',
+                'v', 'w', 'x', 'y', 'z']
+    model = CNN(1, 26)
+elif args.model == "rock-paper-scissors":
+    classnames = ['Rock', 'Paper', 'Scissors', 'Empty']
+    model = CNN(1, 4)
+
+model.load_state_dict(torch.load(f'{dirpath}/weights/{args.model}/model.pth'))
 
 print("Model loaded successfully")
 

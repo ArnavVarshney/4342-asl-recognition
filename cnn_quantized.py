@@ -66,7 +66,7 @@ class CNN_Quantized(nn.Module):
                 new_params[name] = param
         self.load_state_dict(new_params)
 
-        torch.save(new_params, f"{dirname}/weights/cnn_pruned_weights.pth")
+        torch.save(new_params, f"{dirname}/weights/{dataset}/cnn_pruned_weights.pth")
 
     @torch.no_grad()
     def change_datatype(self):
@@ -84,13 +84,13 @@ class CNN_Quantized(nn.Module):
             if "weight" in key:
                 params[key] = torch.round(params[key] / steps_dict[key]).to(torch.int8)
 
-        torch.save(params, f"{dirname}/weights/cnn_quant_weights.pth")
-        torch.save(steps_dict, f"{dirname}/weights/cnn_quant_steps.pth")
+        torch.save(params, f"{dirname}/weights/{dataset}/cnn_quant_weights.pth")
+        torch.save(steps_dict, f"{dirname}/weights/{dataset}/cnn_quant_steps.pth")
 
     @torch.no_grad()
     def load_quantized_params(self):
-        state_dict = torch.load(f"{dirname}/weights/cnn_quant_weights.pth")
-        steps = torch.load(f"{dirname}/weights/cnn_quant_steps.pth")
+        state_dict = torch.load(f"{dirname}/weights/{dataset}/cnn_quant_weights.pth")
+        steps = torch.load(f"{dirname}/weights/{dataset}/cnn_quant_steps.pth")
 
         for key in state_dict.keys():
             if "weight" in key:
@@ -102,35 +102,39 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--epochs", type=int, default=10)
     parser.add_argument("--batch_size", type=int, default=128)
-    parser.add_argument("--train", type=int, default=1)
+    parser.add_argument("--train", type=bool, default=False, action=argparse.BooleanOptionalAction)
     parser.add_argument("--lr", type=float, default=1e-3)
+    parser.add_argument("--dataset", type=str, default="mnist-sign-language", choices=["mnist-sign-language", "rock-paper-scissors"])
 
     epochs = parser.parse_args().epochs
     batch_size = parser.parse_args().batch_size
     training = parser.parse_args().train
     lr = parser.parse_args().lr
-
-    args = parser.parse_args()
+    dataset = parser.parse_args().dataset
 
     train_loader, test_loader = GestureDataset.dataset(
-        os.path.join(dirname, 'mnist-sign-language/train/sign_mnist_train.csv'),
-        os.path.join(dirname, 'mnist-sign-language/test/sign_mnist_test.csv'), args.batch_size)
+        os.path.join(dirname, f'{dataset}/{dataset.replace("-", "_")}_train.csv'),
+        os.path.join(dirname, f'{dataset}/{dataset.replace("-", "_")}_test.csv'), 
+        batch_size)
 
-    if not os.path.exists(f"{dirname}/weights"):
-        os.makedirs(f"{dirname}/weights")
+    if not os.path.exists(f"{dirname}/weights/{dataset}"):
+        os.makedirs(f"{dirname}/weights/{dataset}")
 
     # Original Model
-    model = cnn.CNN().to(device)
+    if dataset == "mnist-sign-language":
+        model = cnn.CNN(1, 26).to(device)
+    elif dataset == "rock-paper-scissors":
+        model = cnn.CNN(1, 4).to(device)
 
     start_time = time.time()
-    if os.path.exists(f"{dirname}/weights/asl.pth"):
-        model.load_state_dict(torch.load(f"{dirname}/weights/asl.pth"))
+    if os.path.exists(f"{dirname}/weights/{dataset}/model.pth"):
+        model.load_state_dict(torch.load(f"{dirname}/weights/{dataset}/model.pth"))
         model.eval()
         print(summary(model, (1, 28, 28)))
     else:
         print(summary(model, (1, 28, 28)))
-        train(model, train_loader, torch.optim.Adam(model.parameters(), lr=1e-3), args.epochs)
-        torch.save(model.state_dict(), f"{dirname}/weights/asl.pth")
+        train(model, train_loader, test_loader, torch.optim.Adam(model.parameters(), lr=1e-3), epochs)
+        torch.save(model.state_dict(), f"{dirname}/weights/{dataset}/model.pth")
         print(f"Training time: {time.time() - start_time:.2f}s")
 
     test(model, test_loader)
@@ -139,14 +143,14 @@ if __name__ == "__main__":
     quant_model = CNN_Quantized(model).to(device)
 
     start_time = time.time()
-    if os.path.exists(f"{dirname}/weights/asl_quant.pth"):
-        quant_model.load_state_dict(torch.load(f"{dirname}/weights/asl_quant.pth"))
+    if os.path.exists(f"{dirname}/weights/{dataset}/model_quant.pth") and not training:
+        quant_model.load_state_dict(torch.load(f"{dirname}/weights/{dataset}/model_quant.pth"))
         quant_model.eval()
         print(summary(quant_model, (1, 28, 28)))
     else:
         print(summary(quant_model, (1, 28, 28)))
-        train(quant_model, train_loader, torch.optim.Adam(quant_model.parameters(), lr=args.lr), args.epochs)
-        torch.save(quant_model.state_dict(), f"{dirname}/weights/asl_quant.pth")
+        train(quant_model, train_loader, test_loader, torch.optim.Adam(quant_model.parameters(), lr=lr), epochs)
+        torch.save(quant_model.state_dict(), f"{dirname}/weights/{dataset}/model_quant.pth")
         print(f"Training time: {time.time() - start_time:.2f}s")
 
     quant_model.change_datatype()
@@ -154,10 +158,10 @@ if __name__ == "__main__":
     print("Accuracy after quantization and change datatype: ")
     test(quant_model, test_loader)
 
-    size_quantized = get_file_size(f"{dirname}/weights/cnn_quant_weights.pth") + get_file_size(
-        f"{dirname}/weights/cnn_quant_steps.pth")
+    size_quantized = get_file_size(f"{dirname}/weights/{dataset}/cnn_quant_weights.pth") + get_file_size(
+        f"{dirname}/weights/{dataset}/cnn_quant_steps.pth")
 
-    size_original = get_file_size(f"{dirname}/weights/asl.pth")
+    size_original = get_file_size(f"{dirname}/weights/{dataset}/model.pth")
 
     print(
         f"Before: {size_original} bytes, Quant: {size_quantized} bytes, Ratio: {size_quantized / size_original * 100:.2f}%")
