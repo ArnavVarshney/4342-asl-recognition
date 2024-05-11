@@ -9,7 +9,7 @@ import GestureDataset
 from utils import train, test, get_confusion_matrix
 
 batch_size = 128
-num_classes = 24
+num_classes = 26
 lr = 0.001
 epochs = 10
 dirname = os.path.dirname(__file__)
@@ -82,7 +82,7 @@ if __name__ == "__main__":
         os.makedirs(f"{dirname}/weights/{dataset}")
 
     if dataset == "mnist-sign-language":
-        model = CNN(1, 24).to(device)
+        model = CNN(1, 26).to(device)
         classnames = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u',
                     'v', 'w', 'x', 'y']
     elif dataset == "rock-paper-scissors":

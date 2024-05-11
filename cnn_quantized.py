@@ -12,7 +12,7 @@ import cnn
 from utils import train, test, fine_grained_prune, get_file_size
 
 batch_size = 128
-num_classes = 24
+num_classes = 26
 lr = 0.001
 epochs = 10
 dirname = os.path.dirname(__file__)
@@ -122,12 +122,12 @@ if __name__ == "__main__":
 
     # Original Model
     if dataset == "mnist-sign-language":
-        model = cnn.CNN(1, 24).to(device)
+        model = cnn.CNN(1, 26).to(device)
     elif dataset == "rock-paper-scissors":
         model = cnn.CNN(1, 4).to(device)
 
     start_time = time.time()
-    if os.path.exists(f"{dirname}/weights/{dataset}/model.pth"):
+    if os.path.exists(f"{dirname}/weights/{dataset}/model.pth") and not training:
         model.load_state_dict(torch.load(f"{dirname}/weights/{dataset}/model.pth"))
         model.eval()
         print(summary(model, (1, 28, 28)))

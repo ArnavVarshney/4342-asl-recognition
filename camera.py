@@ -1,9 +1,9 @@
+import argparse
 import os
 
 import cv2
 import numpy as np
 import torch
-import argparse
 
 from cnn import CNN
 
@@ -15,9 +15,10 @@ parser.add_argument("--model", type=str, default="mnist-sign-language", choices=
 args = parser.parse_args()
 
 if args.model == "mnist-sign-language":
-    classnames = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u',
-                'v', 'w', 'x', 'y']
-    model = CNN(1, 24)
+    classnames = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
+                  'u',
+                  'v', 'w', 'x', 'y', 'z']
+    model = CNN(1, 26)
 elif args.model == "rock-paper-scissors":
     classnames = ['Rock', 'Paper', 'Scissors', 'Empty']
     model = CNN(1, 4)
@@ -33,7 +34,8 @@ cap.set(4, height)
 
 print("Camera initialized successfully")
 
-top, bot, right, left = 0, 240, 400, 640
+top, bot, right, left = 0, 280, 360, 640
+box_center = (right + left) // 2, (top + bot) // 2
 
 cv2.namedWindow("Frame", cv2.WINDOW_NORMAL)
 cv2.namedWindow("ROI", cv2.WINDOW_NORMAL)
@@ -49,8 +51,21 @@ while True:
         continue
 
     roi = frame[top:bot, right:left]
-    roi = cv2.resize(roi, dsize=(28, 28), interpolation=cv2.INTER_CUBIC)
-    roi = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
+    # hsv_roi = cv2.cvtColor(roi, cv2.COLOR_BGR2HSV)
+    # hsv = hsv_roi[roi.shape[0] // 2, roi.shape[1] // 2]
+    # lower_bound = numpy.array([hsv[0] - 10, hsv[1] - 30, 50])
+    # upper_bound = numpy.array([hsv[0] + 10, hsv[1] + 30, 255])
+    #
+    # mask = cv2.inRange(hsv_roi, lower_bound, upper_bound)
+    # mask = cv2.blur(mask, (2, 2))
+    #
+    # ret, thresh = cv2.threshold(mask, 100, 255, cv2.THRESH_BINARY)
+    # cv2.imshow("thresh", thresh)
+    #
+    # roi = cv2.bitwise_and(roi, roi, mask=mask)
+    #
+    # roi = cv2.resize(roi, dsize=(28, 28), interpolation=cv2.INTER_AREA)
+    # roi = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
 
     roi = np.reshape(roi, (1, 1, 28, 28))
     roi = torch.from_numpy(roi).type(torch.FloatTensor)
@@ -70,6 +85,7 @@ while True:
     frame = cv2.putText(frame, f"Predicted: {predicted_class}", (10, 90), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 0, 255),
                         2)
     frame = cv2.rectangle(frame, (left, top), (right, bot), (255, 0, 255), 2)
+    frame = cv2.circle(frame, box_center, 3, (255, 0, 255), -1)
 
     cv2.imshow("Frame", frame)
     cv2.imshow("ROI", roi)
