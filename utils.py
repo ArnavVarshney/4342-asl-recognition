@@ -170,40 +170,74 @@ def get_model_macs(model, inputs) -> int:
     return profile_macs(model, inputs)
 
 
-def train(model, train_loader, optimizer, num_epochs):
+def train(model, train_loader, val_loader, optimizer, num_epochs):
     train_losses = []
     train_accuracies = []
+    val_losses = []
+    val_accuracies = []
 
     for epoch in range(num_epochs):
-        total_loss = 0
-        total_correct = 0
-        total_samples = 0
+        total_train_loss = 0
+        total_train_correct = 0
+        total_train_samples = 0
 
         for batch, (X, y) in enumerate(train_loader):
             X = X.to(device)
             y = y.to(device)
 
+            model.train()
+            optimizer.zero_grad()
             y_pred = model(X)
             loss = model.loss(y_pred, y.squeeze())
-            total_loss += loss.item()
-
-            optimizer.zero_grad()
             loss.backward()
             optimizer.step()
 
+            total_train_loss += loss.item()
+
             train_accuracy = calculate_accuracy(y_pred, y.squeeze())
-            total_correct += train_accuracy * y.size(0)
-            total_samples += y.size(0)
+            total_train_correct += train_accuracy * y.size(0)
+            total_train_samples += y.size(0)
 
-            print(f"Epoch [{epoch + 1}], Step [{batch + 1}], Loss: {loss.item():.4f}", end="\r", )
+            print(f"Epoch [{epoch + 1}], Step [{batch + 1}], Train Loss: {loss.item():.4f}", end="\r")
 
-        avg_loss = total_loss / len(train_loader)
-        train_losses.append(avg_loss)
+        avg_train_loss = total_train_loss / len(train_loader)
+        train_losses.append(avg_train_loss)
 
-        train_accuracy = total_correct / total_samples
+        train_accuracy = total_train_correct / total_train_samples
         train_accuracies.append(train_accuracy)
 
-        print(f"\nEpoch [{epoch + 1}], Average Loss: {avg_loss:.4f}, Accuracy: {train_accuracy:.2f}%")
+        total_val_loss = 0
+        total_val_correct = 0
+        total_val_samples = 0
+
+        model.eval()
+        with torch.no_grad():
+            for X_val, y_val in val_loader:
+                X_val = X_val.to(device)
+                y_val = y_val.to(device)
+
+                y_val_pred = model(X_val)
+                val_loss = model.loss(y_val_pred, y_val.squeeze())
+                total_val_loss += val_loss.item()
+
+                val_accuracy = calculate_accuracy(y_val_pred, y_val.squeeze())
+                total_val_correct += val_accuracy * y_val.size(0)
+                total_val_samples += y_val.size(0)
+
+        avg_val_loss = total_val_loss / len(val_loader)
+        val_losses.append(avg_val_loss)
+
+        val_accuracy = total_val_correct / total_val_samples
+        val_accuracies.append(val_accuracy)
+
+        print(f"\nEpoch [{epoch + 1}], Train Loss: {avg_train_loss:.4f}, Train Accuracy: {train_accuracy:.2f}%")
+        print(f"Epoch [{epoch + 1}], Validation Loss: {avg_val_loss:.4f}, Validation Accuracy: {val_accuracy:.2f}%")
+
+        with open(os.path.join(dir_path, f'{model.__class__.__name__}.txt'), 'w') as f:
+            f.write(f"{train_losses}\n")
+            f.write(f"{train_accuracies}\n")
+            f.write(f"{val_losses}\n")
+            f.write(f"{val_accuracies}\n")
 
     plot_curves(train_losses, train_accuracies, model.__class__.__name__)
 
