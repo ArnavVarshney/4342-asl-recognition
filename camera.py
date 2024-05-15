@@ -87,6 +87,10 @@ while True:
         lower_bound, upper_bound = get_color_bounds(frame)
         break
 
+fps_start = cv2.getTickCount()
+fps_count = 0
+fps = 0
+
 while True:
     ret, frame = cap.read()
 
@@ -126,6 +130,8 @@ while True:
 
     roi = roi.squeeze().numpy()
 
+    frame = cv2.putText(result, f"FPS: {fps}%", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 0),
+                        2)
     frame = cv2.putText(result, f"Confidence: {confidence:.2f}%", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 0),
                         2)
     frame = cv2.putText(result, f"Predicted: {predicted_class}", (10, 90), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 0),
@@ -133,6 +139,12 @@ while True:
 
     cv2.imshow("Result", result)
     cv2.imshow("ROI", roi)
+
+    fps_count += 1
+    if cv2.getTickCount() - fps_start >= cv2.getTickFrequency():
+        fps = fps_count / ((cv2.getTickCount() - fps_start) / cv2.getTickFrequency())
+        fps_start = cv2.getTickCount()
+        fps_count = 0
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
