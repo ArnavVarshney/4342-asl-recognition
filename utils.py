@@ -4,12 +4,11 @@ import time
 
 import matplotlib.pyplot as plt
 import numpy as np
+import seaborn as sns
 import torch
 import torch.nn as nn
-from torchprofile import profile_macs
 from sklearn.metrics import confusion_matrix
-import seaborn as sns
-
+from torchprofile import profile_macs
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -236,10 +235,10 @@ def train(model, train_loader, val_loader, optimizer, num_epochs):
         print(f"\nEpoch [{epoch + 1}], Train Loss: {avg_train_loss:.4f}, Train Accuracy: {train_accuracy:.2f}%")
         print(f"Epoch [{epoch + 1}], Validation Loss: {avg_val_loss:.4f}, Validation Accuracy: {val_accuracy:.2f}%")
 
-        if not os.path.exists(os.path.join(dir_path, 'temp')):
-            os.makedirs(os.path.join(dir_path, 'temp'))
+        if not os.path.exists(os.path.join(dir_path, 'misc/temp')):
+            os.makedirs(os.path.join(dir_path, 'misc/temp'))
 
-        with open(os.path.join(dir_path, f'temp/{model.__class__.__name__}.txt'), 'w') as f:
+        with open(os.path.join(dir_path, f'misc/temp/{model.__class__.__name__}.txt'), 'w') as f:
             f.write(f"{train_losses}\n")
             f.write(f"{train_accuracies}\n")
             f.write(f"{val_losses}\n")
@@ -269,15 +268,17 @@ def test(model, test_loader, int8=False) -> float:
     print(f"Test Accuracy: {100 * correct / total:.2f}%")
     return 100 * correct / total
 
+
 def get_project_root():
     return os.path.dirname(__file__)
+
 
 def get_confusion_matrix(model, dataloader, device, class_labels):
     model.eval()
     model_name = model.__class__.__name__
     true_labels = []
     predicted_labels = []
-    
+
     with torch.no_grad():
         for inputs, labels in dataloader:
             inputs = inputs.to(device)
@@ -286,7 +287,7 @@ def get_confusion_matrix(model, dataloader, device, class_labels):
             _, preds = torch.max(outputs, 1)
             true_labels.extend(labels.cpu().numpy())
             predicted_labels.extend(preds.cpu().numpy())
-    
+
     cm = confusion_matrix(true_labels, predicted_labels)
 
     print(true_labels)

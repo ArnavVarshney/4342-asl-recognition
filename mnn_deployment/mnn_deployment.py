@@ -1,8 +1,8 @@
 import os
 import time
 
-import MNN.nn as nn
 import MNN.expr as expr
+import MNN.nn as nn
 import MNN.numpy as np
 
 import GestureDataset
@@ -14,7 +14,7 @@ config['precision'] = 'high'
 config['backend'] = 0
 config['numThread'] = 1
 
-rt = nn.create_runtime_manager((config, ))
+rt = nn.create_runtime_manager((config,))
 net = nn.load_module_from_file(f"{dirname}/mnn_out/model.mnn", [], [], runtime_manager=rt)
 
 _, test_loader = GestureDataset.dataset(

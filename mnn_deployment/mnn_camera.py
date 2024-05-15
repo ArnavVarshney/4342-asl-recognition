@@ -1,31 +1,31 @@
 import argparse
 import os
 
-import torch
+import MNN.expr as expr
+import MNN.nn as nn
 import cv2
 import numpy as np
-
-import MNN.nn as nn
-import MNN.expr as expr
+import torch
 
 dirpath = os.path.dirname(os.path.realpath(__file__))
 config = {
-    'precision' : 'high',
-    'backend' : 0,
-    'numThread' : 1
+    'precision': 'high',
+    'backend': 0,
+    'numThread': 1
 }
 
-classnames = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 
-              'h', 'i', 'j', 'k', 'l', 'm', 'n', 
+classnames = ['a', 'b', 'c', 'd', 'e', 'f', 'g',
+              'h', 'i', 'j', 'k', 'l', 'm', 'n',
               'o', 'p', 'q', 'r', 's', 't', 'u',
               'v', 'w', 'x', 'y', 'z']
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--model", type=str, default="mnist-sign-language", choices=["mnist-sign-language", "rock-paper-scissors"])
+parser.add_argument("--model", type=str, default="mnist-sign-language",
+                    choices=["mnist-sign-language", "rock-paper-scissors"])
 
 args = parser.parse_args()
 
-rt = nn.create_runtime_manager((config, ))
+rt = nn.create_runtime_manager((config,))
 net = nn.load_module_from_file(f"{dirpath}/mnn_out/model.mnn", [], [], runtime_manager=rt)
 
 print("Model loaded successfully")

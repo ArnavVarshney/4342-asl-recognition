@@ -104,7 +104,8 @@ if __name__ == "__main__":
     parser.add_argument("--batch_size", type=int, default=128)
     parser.add_argument("--train", type=bool, default=False, action=argparse.BooleanOptionalAction)
     parser.add_argument("--lr", type=float, default=1e-3)
-    parser.add_argument("--dataset", type=str, default="mnist-sign-language", choices=["mnist-sign-language", "rock-paper-scissors"])
+    parser.add_argument("--dataset", type=str, default="mnist-sign-language",
+                        choices=["mnist-sign-language", "rock-paper-scissors"])
 
     epochs = parser.parse_args().epochs
     batch_size = parser.parse_args().batch_size
@@ -114,7 +115,7 @@ if __name__ == "__main__":
 
     train_loader, test_loader = GestureDataset.dataset(
         os.path.join(dirname, f'{dataset}/{dataset.replace("-", "_")}_train.csv'),
-        os.path.join(dirname, f'{dataset}/{dataset.replace("-", "_")}_test.csv'), 
+        os.path.join(dirname, f'{dataset}/{dataset.replace("-", "_")}_test.csv'),
         batch_size)
 
     if not os.path.exists(f"{dirname}/weights/{dataset}"):

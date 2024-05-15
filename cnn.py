@@ -65,7 +65,8 @@ if __name__ == "__main__":
     parser.add_argument("--batch_size", type=int, default=128)
     parser.add_argument("--train", type=bool, default=False, action=argparse.BooleanOptionalAction)
     parser.add_argument("--lr", type=float, default=1e-3)
-    parser.add_argument("--dataset", type=str, default="mnist-sign-language", choices=["mnist-sign-language", "rock-paper-scissors"])
+    parser.add_argument("--dataset", type=str, default="mnist-sign-language",
+                        choices=["mnist-sign-language", "rock-paper-scissors"])
 
     epochs = parser.parse_args().epochs
     batch_size = parser.parse_args().batch_size
@@ -75,7 +76,7 @@ if __name__ == "__main__":
 
     train_loader, test_loader = GestureDataset.dataset(
         os.path.join(dirname, f'{dataset}/{dataset.replace("-", "_")}_train.csv'),
-        os.path.join(dirname, f'{dataset}/{dataset.replace("-", "_")}_test.csv'), 
+        os.path.join(dirname, f'{dataset}/{dataset.replace("-", "_")}_test.csv'),
         batch_size)
 
     if not os.path.exists(f"{dirname}/weights/{dataset}"):
@@ -83,12 +84,12 @@ if __name__ == "__main__":
 
     if dataset == "mnist-sign-language":
         model = CNN(1, 26).to(device)
-        classnames = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u',
-                    'v', 'w', 'x', 'y']
+        classnames = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
+                      'u', 'v', 'w', 'x', 'y']
     elif dataset == "rock-paper-scissors":
         model = CNN(1, 4).to(device)
         classnames = ['Rock', 'Paper', 'Scissors', 'Empty']
-    
+
     if os.path.exists(f"{dirname}/weights/{dataset}/model.pth") and not training:
         model.load_state_dict(torch.load(f"{dirname}/weights/{dataset}/model.pth"))
         model.eval()

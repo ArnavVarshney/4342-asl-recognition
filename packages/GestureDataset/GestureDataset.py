@@ -41,5 +41,4 @@ def dataset(train_path, test_path, batch_size=128):
 
     return train_loader, test_loader
 
-from setuptools import setup
 

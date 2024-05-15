@@ -1,24 +1,22 @@
 import argparse
 import os
 
-import torch
 import cv2
 import numpy as np
-
+import torch
 import tvm
 from tvm.contrib import graph_runtime
 
-from cnn import CNN
-
 dirpath = os.path.dirname(os.path.realpath(__file__))
 
-classnames = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 
-              'h', 'i', 'j', 'k', 'l', 'm', 'n', 
+classnames = ['a', 'b', 'c', 'd', 'e', 'f', 'g',
+              'h', 'i', 'j', 'k', 'l', 'm', 'n',
               'o', 'p', 'q', 'r', 's', 't', 'u',
               'v', 'w', 'x', 'y', 'z']
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--model", type=str, default="mnist-sign-language", choices=["mnist-sign-language", "rock-paper-scissors"])
+parser.add_argument("--model", type=str, default="mnist-sign-language",
+                    choices=["mnist-sign-language", "rock-paper-scissors"])
 
 args = parser.parse_args()
 

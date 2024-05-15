@@ -1,16 +1,19 @@
-import cv2
-import numpy as np
-import matplotlib.pyplot as plt
-from copy import deepcopy
-import torch
-import os
 import argparse
+import os
+from copy import deepcopy
+
+import cv2
+import matplotlib.pyplot as plt
+import numpy as np
+import torch
+
 from cnn import CNN
 
 dirpath = os.path.dirname(os.path.realpath(__file__))
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--model", type=str, default="mnist-sign-language", choices=["mnist-sign-language", "rock-paper-scissors"])
+parser.add_argument("--model", type=str, default="mnist-sign-language",
+                    choices=["mnist-sign-language", "rock-paper-scissors"])
 
 args = parser.parse_args()
 
@@ -27,6 +30,7 @@ model.load_state_dict(torch.load(f'{dirpath}/weights/{args.model}/model.pth'))
 
 print("Model loaded successfully")
 
+
 def get_color_bounds(image):
     hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)[width // 2, height // 2]
 
@@ -40,6 +44,7 @@ def get_color_bounds(image):
 
     return lower_bound, upper_bound
 
+
 def get_largest_contour(image):
     contours, _ = cv2.findContours(image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     mask = np.zeros_like(image)
@@ -51,6 +56,7 @@ def get_largest_contour(image):
     cv2.drawContours(mask, [largest_contour], -1, 255, -1)
 
     return mask
+
 
 def get_bounding_box(image, padding=0):
     x, y, w, h = cv2.boundingRect(image)
@@ -64,6 +70,7 @@ def get_bounding_box(image, padding=0):
     y2 = min(centroid[1] + square_size // 2 + padding, image.shape[0])
 
     return x1, y1, x2, y2
+
 
 lower_bound, upper_bound = None, None
 
@@ -98,12 +105,12 @@ while True:
         continue
 
     mask = cv2.inRange(cv2.cvtColor(frame, cv2.COLOR_BGR2HSV), lower_bound, upper_bound)
-    kernel = np.ones((5,5), np.uint8)
+    kernel = np.ones((5, 5), np.uint8)
 
     mask = cv2.erode(mask, kernel, iterations=1)
     mask = cv2.dilate(mask, kernel, iterations=1)
     largest_contour = get_largest_contour(mask)
-    
+
     mask = cv2.dilate(mask, kernel, iterations=1)
     mask = cv2.erode(mask, kernel, iterations=1)
 

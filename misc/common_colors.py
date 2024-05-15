@@ -1,17 +1,14 @@
 import cv2
-import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.colors import hsv_to_rgb
-from copy import deepcopy
-from sklearn.cluster import KMeans
+import numpy as np
 
 
 def get_color_bounds(image):
     hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)[
-        width // 2 - 5 : width // 2 + 5, 
-        height // 2 - 5 : height // 2 + 5,
-        :
-    ].mean(axis=(0, 1))
+          width // 2 - 5: width // 2 + 5,
+          height // 2 - 5: height // 2 + 5,
+          :
+          ].mean(axis=(0, 1))
 
     color = np.uint8([[hsv]])
     color = cv2.cvtColor(color, cv2.COLOR_HSV2RGB)
@@ -22,6 +19,7 @@ def get_color_bounds(image):
     upper_bound = np.array([hsv[0] + 10, hsv[1] + 25, hsv[2] + 50])
 
     return lower_bound, upper_bound
+
 
 lower_bound, upper_bound = None, None
 
@@ -60,7 +58,7 @@ while True:
     mask = np.zeros_like(mask)
     largest_contour = max(contours, key=cv2.contourArea)
     cv2.drawContours(mask, [largest_contour], -1, 255, -1)
-    
+
     x, y, w, h = cv2.boundingRect(largest_contour)
     square_size = max(w, h)
 
@@ -71,8 +69,7 @@ while True:
     x2 = min(centroid[0] + square_size // 2, img.shape[1])
     y2 = min(centroid[1] + square_size // 2, img.shape[0])
 
-
-    kernel = np.ones((5,5), np.uint8)
+    kernel = np.ones((5, 5), np.uint8)
     mask = cv2.dilate(mask, kernel, iterations=1)
     mask = cv2.erode(mask, kernel, iterations=1)
 

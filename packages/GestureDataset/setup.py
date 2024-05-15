@@ -1,8 +1,8 @@
 from setuptools import setup
 
-setup (
+setup(
     name="GestureDataset",
-    version = "0.1",
+    version="0.1",
     author="Davwed0",
     python_requires=">=3.6",
 )
