@@ -1,4 +1,5 @@
 import os
+import time
 
 import numpy as np
 import tvm
@@ -26,7 +27,13 @@ _, test_loader = GestureDataset.dataset(
 )
 
 correct, total = 0, 0
+dummy = next(iter(test_loader))[0].numpy()
 
+for _ in range(20):
+    module.set_input("input.1", dummy)
+    module.run()
+
+time_start = time.time()
 for X, y in test_loader:
     module.set_input("input.1", X.numpy())
     module.run()
@@ -36,5 +43,7 @@ for X, y in test_loader:
 
     correct += np.sum(predictions == y.numpy().squeeze())
     total += y.size(0)
+time_end = time.time()
 
 print(f"Test Accuracy: {100 * correct / total:.2f}%")
+print(f"Latency: {(time_end - time_start) / len(test_loader) * 1000:.3f} ms per image")
