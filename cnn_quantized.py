@@ -170,4 +170,13 @@ if __name__ == "__main__":
     quant_model.magnitude_prune(sparsity_dict)
 
     print("Accuracy after magnitude pruning: ")
+
+    dummy = next(iter(test_loader))[0].to(device)
+    for _ in range(20):
+        quant_model(dummy)
+
+    time_start = time.time()
     test(quant_model, test_loader)
+    time_end = time.time()
+
+    print(f"Latency: {(time_end - time_start) / len(test_loader) * 1000:.3f} ms per image")
