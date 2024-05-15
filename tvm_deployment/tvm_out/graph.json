@@ -6,26 +6,6 @@
       "inputs": []
     }, 
     {
-      "op": "tvm_op", 
-      "name": "tvmgen_default_fused_layout_transform", 
-      "attrs": {
-        "num_outputs": "1", 
-        "num_inputs": "1", 
-        "flatten_data": "0", 
-        "func_name": "tvmgen_default_fused_layout_transform", 
-        "src_layout": "NCHW", 
-        "dst_layout": "NCHW1c", 
-        "hash": "7805707ec859fb3c"
-      }, 
-      "inputs": [
-        [
-          0, 
-          0, 
-          0
-        ]
-      ]
-    }, 
-    {
       "op": "null", 
       "name": "p0", 
       "inputs": []
@@ -37,18 +17,23 @@
     }, 
     {
       "op": "tvm_op", 
-      "name": "tvmgen_default_fused_nn_contrib_conv2d_NCHWc_add_nn_leaky_relu", 
+      "name": "tvmgen_default_fused_nn_conv2d_add_nn_leaky_relu", 
       "attrs": {
         "num_outputs": "1", 
         "num_inputs": "3", 
         "flatten_data": "0", 
-        "func_name": "tvmgen_default_fused_nn_contrib_conv2d_NCHWc_add_nn_leaky_relu", 
-        "out_layout": "NCHW4c", 
-        "kernel_layout": "OIHW1i4o", 
-        "data_layout": "NCHW1c", 
-        "hash": "029f64979dbcf745"
+        "func_name": "tvmgen_default_fused_nn_conv2d_add_nn_leaky_relu", 
+        "out_layout": "", 
+        "kernel_layout": "OIHW4o", 
+        "data_layout": "NCHW", 
+        "hash": "f3823224613efa0b"
       }, 
       "inputs": [
+        [
+          0, 
+          0, 
+          0
+        ], 
         [
           1, 
           0, 
@@ -56,11 +41,6 @@
         ], 
         [
           2, 
-          0, 
-          0
-        ], 
-        [
-          3, 
           0, 
           0
         ]
@@ -78,18 +58,23 @@
     }, 
     {
       "op": "tvm_op", 
-      "name": "tvmgen_default_fused_nn_contrib_conv2d_NCHWc_add_nn_leaky_relu_1", 
+      "name": "tvmgen_default_fused_nn_conv2d_add_nn_leaky_relu_1", 
       "attrs": {
         "num_outputs": "1", 
         "num_inputs": "3", 
         "flatten_data": "0", 
-        "func_name": "tvmgen_default_fused_nn_contrib_conv2d_NCHWc_add_nn_leaky_relu_1", 
-        "out_layout": "NCHW4c", 
-        "kernel_layout": "OIHW4i4o", 
-        "data_layout": "NCHW4c", 
-        "hash": "ba28605d65d597f2"
+        "func_name": "tvmgen_default_fused_nn_conv2d_add_nn_leaky_relu_1", 
+        "out_layout": "", 
+        "kernel_layout": "OIHW4o", 
+        "data_layout": "NCHW", 
+        "hash": "9217ab57c5c21d42"
       }, 
       "inputs": [
+        [
+          3, 
+          0, 
+          0
+        ], 
         [
           4, 
           0, 
@@ -97,11 +82,6 @@
         ], 
         [
           5, 
-          0, 
-          0
-        ], 
-        [
-          6, 
           0, 
           0
         ]
@@ -116,12 +96,12 @@
         "flatten_data": "0", 
         "func_name": "tvmgen_default_fused_nn_max_pool2d", 
         "out_layout": "", 
-        "layout": "NCHW4c", 
-        "hash": "67a8f18080e8e1b2"
+        "layout": "NCHW", 
+        "hash": "cbe98f9f7257c81e"
       }, 
       "inputs": [
         [
-          7, 
+          6, 
           0, 
           0
         ]
@@ -139,18 +119,23 @@
     }, 
     {
       "op": "tvm_op", 
-      "name": "tvmgen_default_fused_nn_contrib_conv2d_NCHWc_add_nn_leaky_relu_2", 
+      "name": "tvmgen_default_fused_nn_conv2d_add_nn_leaky_relu_2", 
       "attrs": {
         "num_outputs": "1", 
         "num_inputs": "3", 
         "flatten_data": "0", 
-        "func_name": "tvmgen_default_fused_nn_contrib_conv2d_NCHWc_add_nn_leaky_relu_2", 
-        "out_layout": "NCHW4c", 
-        "kernel_layout": "OIHW4i4o", 
-        "data_layout": "NCHW4c", 
-        "hash": "cff7bba77ce402ef"
+        "func_name": "tvmgen_default_fused_nn_conv2d_add_nn_leaky_relu_2", 
+        "out_layout": "", 
+        "kernel_layout": "OIHW4o", 
+        "data_layout": "NCHW", 
+        "hash": "f1a28d229e6b6b7d"
       }, 
       "inputs": [
+        [
+          7, 
+          0, 
+          0
+        ], 
         [
           8, 
           0, 
@@ -158,11 +143,6 @@
         ], 
         [
           9, 
-          0, 
-          0
-        ], 
-        [
-          10, 
           0, 
           0
         ]
@@ -177,12 +157,12 @@
         "flatten_data": "0", 
         "func_name": "tvmgen_default_fused_nn_max_pool2d_1", 
         "out_layout": "", 
-        "layout": "NCHW4c", 
-        "hash": "b7d94197b5e8f316"
+        "layout": "NCHW", 
+        "hash": "cdc5e83b68a500b5"
       }, 
       "inputs": [
         [
-          11, 
+          10, 
           0, 
           0
         ]
@@ -190,19 +170,17 @@
     }, 
     {
       "op": "tvm_op", 
-      "name": "tvmgen_default_fused_layout_transform_nn_batch_flatten", 
+      "name": "reshape_nop", 
       "attrs": {
         "num_outputs": "1", 
         "num_inputs": "1", 
         "flatten_data": "0", 
-        "func_name": "tvmgen_default_fused_layout_transform_nn_batch_flatten", 
-        "src_layout": "NCHW4c", 
-        "dst_layout": "NCHW", 
-        "hash": "ffc6b1c753ce8553"
+        "func_name": "__nop", 
+        "hash": "825f01c7c1d20fdc"
       }, 
       "inputs": [
         [
-          12, 
+          11, 
           0, 
           0
         ]
@@ -220,16 +198,20 @@
     }, 
     {
       "op": "tvm_op", 
-      "name": "tvmgen_default_fused_nn_contrib_dense_pack_add", 
+      "name": "tvmgen_default_fused_nn_dense_add", 
       "attrs": {
         "num_outputs": "1", 
         "num_inputs": "3", 
         "flatten_data": "0", 
-        "func_name": "tvmgen_default_fused_nn_contrib_dense_pack_add", 
-        "weight_layout": "NC2n", 
-        "hash": "b6ba1deae1157c4e"
+        "func_name": "tvmgen_default_fused_nn_dense_add", 
+        "hash": "91b0f525f0685c99"
       }, 
       "inputs": [
+        [
+          12, 
+          0, 
+          0
+        ], 
         [
           13, 
           0, 
@@ -239,37 +221,14 @@
           14, 
           0, 
           0
-        ], 
-        [
-          15, 
-          0, 
-          0
-        ]
-      ]
-    }, 
-    {
-      "op": "tvm_op", 
-      "name": "tvmgen_default_fused_nn_softmax_log", 
-      "attrs": {
-        "num_outputs": "1", 
-        "num_inputs": "1", 
-        "flatten_data": "0", 
-        "func_name": "tvmgen_default_fused_nn_softmax_log", 
-        "hash": "dae2da9bcc576e10"
-      }, 
-      "inputs": [
-        [
-          16, 
-          0, 
-          0
         ]
       ]
     }
   ], 
-  "arg_nodes": [0, 2, 3, 5, 6, 9, 10, 14, 15], 
+  "arg_nodes": [0, 1, 2, 4, 5, 8, 9, 13, 14], 
   "heads": [
     [
-      17, 
+      15, 
       0, 
       0
     ]
@@ -278,8 +237,6 @@
     "dltype": [
       "list_str", 
       [
-        "float32", 
-        "float32", 
         "float32", 
         "float32", 
         "float32", 
@@ -316,8 +273,6 @@
         1, 
         1, 
         1, 
-        1, 
-        1, 
         1
       ]
     ], 
@@ -331,40 +286,36 @@
         4, 
         5, 
         6, 
+        3, 
         7, 
-        4, 
         8, 
+        6, 
+        3, 
+        3, 
         9, 
-        7, 
-        4, 
-        7, 
         10, 
-        11, 
-        12, 
-        13
+        11
       ]
     ], 
     "shape": [
       "list_shape", 
       [
-        [128, 1, 28, 28], 
-        [128, 1, 28, 28, 1], 
-        [4, 1, 3, 3, 1, 4], 
-        [1, 4, 1, 1, 4], 
-        [128, 4, 28, 28, 4], 
-        [8, 4, 3, 3, 4, 4], 
-        [1, 8, 1, 1, 4], 
-        [128, 8, 28, 28, 4], 
-        [128, 8, 14, 14, 4], 
-        [16, 8, 3, 3, 4, 4], 
-        [1, 16, 1, 1, 4], 
-        [128, 16, 14, 14, 4], 
-        [128, 16, 7, 7, 4], 
-        [128, 3136], 
-        [13, 3136, 2], 
+        [1, 1, 28, 28], 
+        [4, 1, 3, 3, 4], 
+        [1, 16, 1, 1], 
+        [1, 16, 28, 28], 
+        [8, 16, 3, 3, 4], 
+        [1, 32, 1, 1], 
+        [1, 32, 28, 28], 
+        [1, 32, 14, 14], 
+        [16, 32, 3, 3, 4], 
+        [1, 64, 1, 1], 
+        [1, 64, 14, 14], 
+        [1, 64, 7, 7], 
+        [1, 3136], 
+        [26, 3136], 
         [1, 26], 
-        [128, 26], 
-        [128, 26]
+        [1, 26]
       ]
     ]
   }, 
@@ -385,8 +336,6 @@
     13, 
     14, 
     15, 
-    16, 
-    17, 
-    18
+    16
   ]
 }
