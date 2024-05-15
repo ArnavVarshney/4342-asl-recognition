@@ -30,7 +30,6 @@ for _ in range(20):
     input_data = expr.convert(dummy, expr.NC4HW4)
     output = net.forward(input_data)
     output = expr.convert(output, expr.NHWC)
-    predictions = np.argmax(output, axis=1)
 
 time_start = time.time()
 for X, y in test_loader:
