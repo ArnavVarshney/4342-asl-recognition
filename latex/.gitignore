@@ -1,0 +1,34 @@
+# LaTeX build files
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+*.synctex.gz
+*.toc
+
+# LaTeX intermediate files
+*.fdb_latexmk
+*.fls
+*.lof
+*.lot
+*.nav
+*.snm
+*.vrb
+
+# LaTeX generated files
+literature_review/*.pdf
+*.dvi
+*.ps
+
+# LaTeX editor files
+*.swp
+*.synctex(busy)
+*.synctex.gz(busy)
+*.synctex.gz(busy_uncompressed)
+*.synctex(busy_uncompressed)
+*.pdfsync
+
+# LaTeX project specific files
+.texlive
+*.latexmain

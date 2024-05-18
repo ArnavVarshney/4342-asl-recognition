@@ -2,3 +2,4 @@ __pycache__
 __pycache__/**
 .vscode
 /tvm_deployment/.pkl_memoize_py3/
+/out
