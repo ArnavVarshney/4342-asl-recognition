@@ -830,43 +830,4 @@ CMakeFiles/mytarget.dir/ncnn.cpp.o: \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.0.sdk/usr/include/c++/v1/__filesystem/path_iterator.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.0.sdk/usr/include/c++/v1/__filesystem/recursive_directory_iterator.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.0.sdk/usr/include/c++/v1/__filesystem/u8path.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.0.sdk/usr/include/c++/v1/sstream \
-  /Users/pregabalin/Documents/Studies/Year_3/Sem2/ELEC4342/project/technical_project/opencv/modules/core/include/opencv2/core.hpp \
-  /Users/pregabalin/Documents/Studies/Year_3/Sem2/ELEC4342/project/technical_project/opencv/modules/core/include/opencv2/core/cvdef.h \
-  /Users/pregabalin/Documents/Studies/Year_3/Sem2/ELEC4342/project/technical_project/opencv/modules/core/include/opencv2/core/version.hpp \
-  /Users/pregabalin/Documents/Studies/Year_3/Sem2/ELEC4342/project/technical_project/opencv/modules/core/include/opencv2/core/hal/interface.h \
-  /Users/pregabalin/Documents/Studies/Year_3/Sem2/ELEC4342/project/technical_project/opencv/modules/core/include/opencv2/core/cv_cpu_dispatch.h \
-  /Users/pregabalin/Documents/Studies/Year_3/Sem2/ELEC4342/project/technical_project/opencv/modules/core/include/opencv2/core/base.hpp \
-  /Users/pregabalin/Documents/Studies/Year_3/Sem2/ELEC4342/project/technical_project/build_opencv/opencv2/opencv_modules.hpp \
-  /Users/pregabalin/Documents/Studies/Year_3/Sem2/ELEC4342/project/technical_project/opencv/modules/core/include/opencv2/core/cvstd.hpp \
-  /Users/pregabalin/Documents/Studies/Year_3/Sem2/ELEC4342/project/technical_project/opencv/modules/core/include/opencv2/core/cvstd_wrapper.hpp \
-  /Users/pregabalin/Documents/Studies/Year_3/Sem2/ELEC4342/project/technical_project/opencv/modules/core/include/opencv2/core/neon_utils.hpp \
-  /Users/pregabalin/Documents/Studies/Year_3/Sem2/ELEC4342/project/technical_project/opencv/modules/core/include/opencv2/core/vsx_utils.hpp \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.0.sdk/usr/include/assert.h \
-  /Users/pregabalin/Documents/Studies/Year_3/Sem2/ELEC4342/project/technical_project/opencv/modules/core/include/opencv2/core/check.hpp \
-  /Users/pregabalin/Documents/Studies/Year_3/Sem2/ELEC4342/project/technical_project/opencv/modules/core/include/opencv2/core/traits.hpp \
-  /Users/pregabalin/Documents/Studies/Year_3/Sem2/ELEC4342/project/technical_project/opencv/modules/core/include/opencv2/core/matx.hpp \
-  /Users/pregabalin/Documents/Studies/Year_3/Sem2/ELEC4342/project/technical_project/opencv/modules/core/include/opencv2/core/saturate.hpp \
-  /Users/pregabalin/Documents/Studies/Year_3/Sem2/ELEC4342/project/technical_project/opencv/modules/core/include/opencv2/core/fast_math.hpp \
-  /Users/pregabalin/Documents/Studies/Year_3/Sem2/ELEC4342/project/technical_project/opencv/modules/core/include/opencv2/core/matx.inl.hpp \
-  /Users/pregabalin/Documents/Studies/Year_3/Sem2/ELEC4342/project/technical_project/opencv/modules/core/include/opencv2/core/types.hpp \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.0.sdk/usr/include/c++/v1/cfloat \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.0.sdk/usr/include/c++/v1/float.h \
-  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/float.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.0.sdk/usr/include/float.h \
-  /Users/pregabalin/Documents/Studies/Year_3/Sem2/ELEC4342/project/technical_project/opencv/modules/core/include/opencv2/core/mat.hpp \
-  /Users/pregabalin/Documents/Studies/Year_3/Sem2/ELEC4342/project/technical_project/opencv/modules/core/include/opencv2/core/bufferpool.hpp \
-  /Users/pregabalin/Documents/Studies/Year_3/Sem2/ELEC4342/project/technical_project/opencv/modules/core/include/opencv2/core/mat.inl.hpp \
-  /Users/pregabalin/Documents/Studies/Year_3/Sem2/ELEC4342/project/technical_project/opencv/modules/core/include/opencv2/core/persistence.hpp \
-  /Users/pregabalin/Documents/Studies/Year_3/Sem2/ELEC4342/project/technical_project/opencv/modules/core/include/opencv2/core/operations.hpp \
-  /Users/pregabalin/Documents/Studies/Year_3/Sem2/ELEC4342/project/technical_project/opencv/modules/core/include/opencv2/core/cvstd.inl.hpp \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.0.sdk/usr/include/c++/v1/complex \
-  /Users/pregabalin/Documents/Studies/Year_3/Sem2/ELEC4342/project/technical_project/opencv/modules/core/include/opencv2/core/utility.hpp \
-  /Users/pregabalin/Documents/Studies/Year_3/Sem2/ELEC4342/project/technical_project/opencv/modules/core/include/opencv2/core/optim.hpp \
-  /Users/pregabalin/Documents/Studies/Year_3/Sem2/ELEC4342/project/technical_project/opencv/modules/core/include/opencv2/core/ovx.hpp \
-  /Users/pregabalin/Documents/Studies/Year_3/Sem2/ELEC4342/project/technical_project/opencv/modules/imgcodecs/include/opencv2/imgcodecs.hpp \
-  /Users/pregabalin/Documents/Studies/Year_3/Sem2/ELEC4342/project/technical_project/opencv/modules/highgui/include/opencv2/highgui.hpp \
-  /Users/pregabalin/Documents/Studies/Year_3/Sem2/ELEC4342/project/technical_project/opencv/modules/videoio/include/opencv2/videoio.hpp \
-  /Users/pregabalin/Documents/Studies/Year_3/Sem2/ELEC4342/project/technical_project/opencv/modules/imgproc/include/opencv2/imgproc/imgproc.hpp \
-  /Users/pregabalin/Documents/Studies/Year_3/Sem2/ELEC4342/project/technical_project/opencv/modules/imgproc/include/opencv2/imgproc.hpp \
-  /Users/pregabalin/Documents/Studies/Year_3/Sem2/ELEC4342/project/technical_project/opencv/modules/imgproc/include/opencv2/./imgproc/segmentation.hpp
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.0.sdk/usr/include/c++/v1/sstream
