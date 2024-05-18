@@ -35,27 +35,19 @@
     \section{Introduction}
     \label{sec:introduction}
 
-    \{Generated from GPT; a placeholder\}
     Deep learning algorithms, particularly neural networks with millions of parameters, have demonstrated exceptional capabilities in solving complex tasks such as image recognition, speech synthesis, and language translation.
-    However, the computational demands of training and deploying these models pose significant challenges for traditional CPUs (Central Processing Units) and even GPUs.
-    To address this issue, specialized hardware accelerators specifically designed for deep learning workloads have gained immense popularity.
+    However, the computational demands of training and deploying these models pose significant challenges for traditional CPUs (Central Processing Units) and even Graphics Processing Units (GPUs).
+    To address this issue, specialized hardware accelerators specifically designed for deep learning workloads have gained immense popularity such as Google's Tensor Processing Unit (TPU).
 
-    Google's Tensor Processing Unit (TPU) and Nvidia's A100 GPU have emerged as two prominent contenders in the market, representing cutting-edge architectures tailored to accelerate deep learning tasks.
+    Google's TPUv4, Nvidia's A100 GPU, and AMD's Radeon VII GPU have emerged as prominent contenders in the market, representing cutting-edge architectures tailored to accelerate deep learning tasks.
     While both platforms aim to deliver high performance, they adopt different approaches to achieve optimal efficiency.
-    The TPU is a custom-built integrated circuit designed by Google, while the A100 leverages the latest GPU architecture from Nvidia.
-    Understanding the unique features and trade-offs of each platform is crucial for researchers and practitioners to make informed decisions when selecting hardware accelerators for their deep learning applications.
+    The TPU is a custom-built application-specific integrated circuit (ASIC) designed by Google, while the A100 leverages the Ampere architecture from Nvidia.
 
-    This paper presents a detailed comparative analysis of Google's TPU and Nvidia's A100, focusing on their architectural characteristics, computational capabilities, memory systems, and power efficiency.
-    Furthermore, we explore their performance across a range of deep learning benchmarks and discuss the impact of each platform's design choices on the overall performance and usability.
-    The analysis considers factors such as peak performance, memory bandwidth, precision support, and software ecosystem to provide a comprehensive evaluation of the strengths and weaknesses of each platform.
+    This paper presents a detailed comparative analysis of Google's TPUv4 and Nvidia's A100, focusing on their architectural characteristics, computational capabilities, memory systems, and power efficiency.
+    Furthermore, the performance of several accelerators (both GPUs and TPUs) is evaluated across computation-intensive operations and a range of deep learning benchmarks.
+    A brief discussion on the impact of each platform's design choices on the overall performance and usability is also provided.
 
-    The remainder of this document is structured as follows: Section II provides an overview of the architectural features of Google's TPU and Nvidia's A100.
-    Section III discusses the performance metrics and benchmarks used to evaluate the platforms.
-    Section IV presents a comparative analysis of the TPU and A100, highlighting their similarities and differences.
-    Section V discusses the implications of the findings and provides recommendations for selecting the most suitable platform for different deep learning applications.
-    Finally, Section VI concludes the paper and outlines potential avenues for future research in the field of deep learning hardware accelerators.
-
-    In summary, this paper aims to contribute to the body of knowledge surrounding hardware accelerators for deep learning by providing an in-depth analysis of Google's TPU and Nvidia's A100.
+    Finally, the paper is concluded with a brief outline on potential avenues for future research in the field of deep learning hardware accelerators.
     The results of this comparative study will aid researchers, developers, and practitioners in making informed decisions when selecting the most appropriate platform for their specific deep learning requirements.
 
 
