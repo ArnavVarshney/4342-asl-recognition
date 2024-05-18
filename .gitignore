@@ -3,3 +3,4 @@ __pycache__/**
 .vscode
 /tvm_deployment/.pkl_memoize_py3/
 /out
+/GestureDataset
