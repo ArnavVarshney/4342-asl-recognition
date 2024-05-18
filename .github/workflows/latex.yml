@@ -6,12 +6,12 @@ jobs:
     steps:
       - name: Set up Git repository
         uses: actions/checkout@v4
-      - name: Compile LaTeX document
+      - name: Compile LaTeX document (literature_review)
         uses: xu-cheng/latex-action@v3
         with:
-          root_file: latex/literature_review/main.tex
-      - name: Upload PDF file
-        uses: actions/upload-artifact@v4
+          working-directory: latex/literature_review
+          root_file: main.tex
+      - name: Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: PDF
-          path: literature_review.pdf
+          files: out/main.pdf
