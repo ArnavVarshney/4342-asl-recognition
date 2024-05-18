@@ -136,8 +136,9 @@ int infer(vector<double> datum){
 }
 
 int main(){
-    net.load_param("../../ncnn_out/resnet18.param");
-    net.load_model("../../ncnn_out/resnet18.bin");
+    system("python3 ../convert.py");
+    net.load_param("../ncnn_out/model.param");
+    net.load_model("../ncnn_out/model.bin");
 
     vector<vector<double> > data = loadImgs();
     int count = 0;
