@@ -15,7 +15,6 @@ jobs:
           work_in_root_file_dir: true
           root_file: main.tex
       - name: Push generated PDF
-        uses: actions/checkout@v4
         run: |
           ls -R
           git config user.name github-actions
