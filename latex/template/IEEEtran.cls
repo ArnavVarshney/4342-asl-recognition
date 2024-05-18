@@ -3072,7 +3072,7 @@ bottom text margin to \CLASSINPUTbottomtextmargin\space via \string\CLASSINPUT.}
 \fi}
 
 
-% allows users to "push away" equations that get too close to the equation numbers
+% allows users to "push.yml away" equations that get too close to the equation numbers
 \def\IEEEeqnarraynumspace{\hphantom{\ifnum\c@IEEEsubequation>0\relax\theIEEEsubequationdis\else\theequationdis\fi}}
 
 % provides a way to span multiple columns within IEEEeqnarray environments

@@ -1,0 +1,16 @@
+name: Push generated PDF
+on: push
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: |
+          ls -R
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add latex/literature_review/
+          git commit -m "Update generated PDF"
+          git push
