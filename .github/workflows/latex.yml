@@ -1,5 +1,7 @@
 name: Build LaTeX document
 on: [ push ]
+permissions:
+  contents: write
 jobs:
   build_latex:
     runs-on: ubuntu-latest
@@ -12,3 +14,12 @@ jobs:
           working_directory: latex/literature_review
           work_in_root_file_dir: true
           root_file: main.tex
+      - name: Push generated PDF
+        uses: actions/checkout@v4
+        run: |
+          ls -R
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add latex/literature_review/
+          git commit -m "Update generated PDF"
+          git push
