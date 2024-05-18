@@ -1,0 +1,3 @@
+/Users/pregabalin/Documents/Studies/Year_3/Sem2/ELEC4342/project/technical_project/4342-asl-recognition/ncnn_deployment/build/CMakeFiles/mytarget.dir
+/Users/pregabalin/Documents/Studies/Year_3/Sem2/ELEC4342/project/technical_project/4342-asl-recognition/ncnn_deployment/build/CMakeFiles/edit_cache.dir
+/Users/pregabalin/Documents/Studies/Year_3/Sem2/ELEC4342/project/technical_project/4342-asl-recognition/ncnn_deployment/build/CMakeFiles/rebuild_cache.dir
