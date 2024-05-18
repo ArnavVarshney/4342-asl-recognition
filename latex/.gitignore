@@ -17,7 +17,6 @@
 *.vrb
 
 # LaTeX generated files
-literature_review/*.pdf
 *.dvi
 *.ps
 
