@@ -196,7 +196,7 @@
     As they are more suited for dense arithmetic operation.
 
     In this context, there were 2 possible solutions: either put it in the host’s CPU or put it in the tensor cores themselves.
-    The Host’s CPU approach would introduce a bottleneck during the next iterations by Ahmdall’s law; in comparison, there is a 4:1 TPUv4 to host CPU ratio.
+    The Host’s CPU approach would introduce a bottleneck during the next iterations by Ahmdal’s law; in comparison, there is a 4:1 TPUv4 to host CPU ratio.
     On the other hand putting it in the TC would be suboptimal due to their nature.
     A way out of this is to utilize both the HBM and the dedicated Inter-Core Interconnect (ICI) network which are embedded in the chips.
     With these in mind, comes SparseCore (SC).
@@ -209,4 +209,10 @@
     PA-NAS optimizes operations related to this to achieve “pareto-optimal performance and quality”.
 
 
+    \section{Contribution Statement}
+    \begin{itemize}
+        \item Abel Haris Harsono: 33.3\%
+        \item Arnav Varshney: 33.3\%
+        \item Filbert David Tejalaksana: 33.3\%
+    \end{itemize}
 \end{document}
