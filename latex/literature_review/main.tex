@@ -24,14 +24,16 @@
     \maketitle
 
     \begin{abstract}
-        This document is a model and instructions for \LaTeX.
-        This and the IEEEtran.cls file define the components of your paper [title, text, heads, etc.].
-        *CRITICAL: Do Not Use Symbols, Special Characters, Footnotes,
-        or Math in Paper Title or Abstract.
+        This paper presents a comprehensive comparative analysis of Google's Tensor Processing Unit (TPUv4) and Nvidia's A100 GPU, the two leading hardware accelerators designed for deep learning workloads and AI applications.
+        We delve into their architectural characteristics, computational capabilities, memory systems, and power efficiency.
+        The performance of these accelerators is evaluated across computation-intensive operations and a range of deep learning benchmarks.
+        The impact of each platform's design choices on overall performance and usability was also studied.
+        The findings of this study will assist researchers, developers, and practitioners in selecting the most suitable platform for their specific deep learning needs.
+        Furthermore, the evaluation results could guide future hardware and software design iterations for further optimization.
     \end{abstract}
 
     \begin{IEEEkeywords}
-        component, formatting, style, styling, insert
+        Tensor Processing Unit, TPUv4, Nvidia A100, GPU, Deep Learning, Hardware Accelerators, Computational Capabilities, Memory Systems, Power Efficiency, Performance Evaluation, Platform Design, Neural Architecture Search, SparseCore, Optical Switches, Embedding
     \end{IEEEkeywords}
 
 
@@ -76,6 +78,15 @@
     \label{sec:performance-evaluation}
     \input{performance}
 
+    \vspace{15pt}
+
+
+    \section{Applications}
+    \label{sec:Applications}
+    \input{applications}
+
+    \vspace{15pt}
+
 
     \section{Contribution Statement}
     \label{sec:contribution-statement}
@@ -85,6 +96,7 @@
         \item Filbert David Tejalaksana: 33.3\%
     \end{itemize}
 
+    \vspace{15pt}
     \label{itm:refs}
     \input{refs}
 
