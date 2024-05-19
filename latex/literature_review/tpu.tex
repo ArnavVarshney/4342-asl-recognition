@@ -22,7 +22,7 @@ For instance, by default, the connections would resemble a torus.
 Furthermore, within this system, a CPU is also in use.
 With TPUv4, there is one CPU for every 4 TPU chips resulting in around 1000 CPUs in total.
 
-The TPU works by first loading parameters from the HBM into individual multiply-accumulators and then feed the data/input/activation to one row/coloumn of the array-like architecture.
+The TPU works by first loading parameters from the HBM into individual multiply-accumulators and then feed the data/input/activation to one row/column of the array-like architecture.
 The results of one computation feed the next one, and so on, similar to how a ripple-carry adder works.
 
 \subsection{TPUv4}
@@ -60,7 +60,7 @@ And because the OCSs bring some sort of independence to the system (particularly
 Second, the most obvious one, configurability.
 The OCS greatly simplifies scheduling and networking within the system due to its great switching speed.
 For instance, it no longer has to search for many contiguous chips during scheduling as required by the previous version and the OCS. It allows modularity between users (the whole system can cater to multiple users) which enhances security.
-Finally, the logical connection can be easily reconfigured to one's topological needs, typically to exploit different kind of parallelisms (i.e. Data, Model, and Pipeline parallelism), as ``rewiring'' the system mostly involves reprogramming the routes of the OCS\@.
+Finally, the logical connection can be easily reconfigured to one's topological needs, typically to exploit different kind of parallelisms (i.e., Data, Model, and Pipeline parallelism), as ``rewiring'' the system mostly involves reprogramming the routes of the OCS\@.
 
 \subsubsection{SparseCore}
 Like any other computers dealing with ML, this one is for dealing with embedding.
@@ -83,4 +83,4 @@ Each compute tile consists of a fetch unit, Single Instruction Multiple Data (SI
 \subsubsection{Platform-Aware Neural Architecture Search}
 Platform-Aware Neural Architecture Search or PA-NAS has a goal to configure both the ML model and the TPU topology to benefit from each other as much as possible.
 In particular, with the mention of SC, a model in the TPU might need to use both SC and TC efficiently.
-PA-NAS optimizes operations related to this to achieve what's called ``pareto-optimal performance and quality''.
+PA-NAS optimizes operations related to this to achieve ``pareto-optimal performance and quality''.
