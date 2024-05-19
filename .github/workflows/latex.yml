@@ -20,6 +20,7 @@ jobs:
           working_directory: latex/literature_review
           work_in_root_file_dir: true
           root_file: main.tex
+          args: -pdf -file-line-error -f -interaction=nonstopmode
       - name: Push generated PDF
         run: |
           git config user.name github-actions
