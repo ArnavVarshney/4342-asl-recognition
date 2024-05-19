@@ -6,7 +6,6 @@ While GPUs and CPUs are considered general purpose, TPUs are an application-spec
 Developed by Google, they are built to accelerate performance of Machine Learning (ML) related applications, particularly their linear algebraic processes that involve matrices.
 This is also reflected by the hardware incorporated into them.
 As a consequence, however, they cannot do much else, at least not efficiently.
-As of now, the TPU has iterated to its fifth version.
 The Tensor Processing Unit (TPU) has currently evolved to its fifth version.
 However, for the purposes of this work, only TPUv4 will be discussed, highlighting its important features.
 
@@ -14,23 +13,23 @@ However, for the purposes of this work, only TPUv4 will be discussed, highlighti
 \label{subsec:structure}
 There are 2 main components to a TPU chip: High Bandwidth Memory (HBM) and the Tensor Cores (TC).
 The HBM is an on-chip memory allowing for larger models and bigger batch sizes to utilize.
-The TCs on the other hand consist of many multiply-accumulators; the special hardware that allows for an increase in speed for matrix-related operations.
-These multiply-accumulators are all arranged in an array-like structure within the chip called the systolic array structure.
+The TCs on the other hand consist of many multiply-accumulators; the special hardware that allows for an increase in speed for the matrix-related operations.
+These multiply-accumulators are all arranged in an array-like structure, called the systolic array structure, within the chip.
 
 Google’s TPU machine consists of thousands of these TPU chips (as of TPUv4, there are 4096 chips placed inside).
 Within the machine itself, the chips are arranged physically as separate 4 x 4 x 4 cube but the inner networking between the chips, their logical connection, is more flexible and can be defined by the user.
 For instance, by default, the connections would resemble a torus.
 Furthermore, within this system, a CPU is also in use.
-With TPUv4, there is one CPU for every 4 TPU chips resulting in around 1000 CPUs in use.
+With TPUv4, there is one CPU for every 4 TPU chips resulting in around 1000 CPUs in total.
 
-The TPU works by first loading parameters from the HBM into individual multiply-accumulators and then to one layer of the array-like architecture.
+The TPU works by first loading parameters from the HBM into individual multiply-accumulators and then feed the data/input/activation to one row/coloumn of the array-like architecture.
 The results of one computation feed the next one, and so on, similar to how a ripple-carry adder works.
 
 \subsection{TPUv4}
 \label{subsec:tpuv4}
-The main improvements introduced by TPUv4 handle around the subject of scale and reliability using Google's very own advancement in optical switches.
+The main improvements introduced by TPUv4 mainly handle around the subject of scale and reliability using Google's very own advancement in optical switches.
 Additionally, just as any other kind of iteration, the TPUv4 also improves certain aspects of the system.
-For example, the storage of embeddings is dealt by introducing appropriate hardware architectures and introducing a way that allows for a better compatibility between hardware and the model.
+For example, the storage of embeddings is dealt by introducing appropriate hardware architectures and a way that allows for a better compatibility between hardware and the model was also introduced.
 
 \subsubsection{Reconfigurable Optical Switches}
 The TPUv4 is equipped with 4096 TPU chips.
@@ -56,12 +55,12 @@ In total, for TPUv4, there are typically 3 * 16 = 48 OCSs for a single machine.
 The OCS brings a multitude of benefits.
 The first being availability and deployment benefits.
 Being flexible and having better performance allows TPUv4 to still provide good services, even when some chips of the system may not be available.
-And because the OCSs bring some sort of independence to the system (particularly, it made each rack of the chips more independent), not all chips are needed to ensure operability.
+And because the OCSs bring some sort of independence to the system (particularly, it made each rack of the machine more independent), not all chips are needed to ensure operability.
 
 Second, the most obvious one, configurability.
 The OCS greatly simplifies scheduling and networking within the system due to its great switching speed.
 For instance, it no longer has to search for many contiguous chips during scheduling as required by the previous version and the OCS. It allows modularity between users (the whole system can cater to multiple users) which enhances security.
-Finally, the logical connection can be easily reconfigured to one's topological needs, like exploiting parallelisms, as ``rewiring'' the system mostly involves reprogramming the routes of the OCS\@.
+Finally, the logical connection can be easily reconfigured to one's topological needs, typically to exploit different kind of parallelisms (i.e. Data, Model, and Pipeline parallelism), as ``rewiring'' the system mostly involves reprogramming the routes of the OCS\@.
 
 \subsubsection{SparseCore}
 Like any other computers dealing with ML, this one is for dealing with embedding.
@@ -69,8 +68,8 @@ In particular, where to store the lookup tables from the embedding process.
 The main problem here is that the lookup operations will cause a bottleneck for the chips due to memory accesses, inter-chip communication, etc.
 As they are more suited for dense arithmetic operation.
 
-In this context, there were two possible solutions: either put it in the host’s CPU or put it in the tensor cores themselves.
-The Host’s CPU approach would introduce a bottleneck during the next iterations of Amdahl’s law; in comparison, there is a 4:1 TPUv4 to host CPU ratio.
+In this context, there were two possible solutions: either put it in the CPU or put it in the tensor cores themselves.
+The CPU approach would introduce a bottleneck during the next iterations by Amdahl’s law; in comparison, there is a 4:1 TPUv4 to host CPU ratio.
 On the other hand, putting it in the TC would be suboptimal due to them being optimized for dense operations.
 A way out of this is to use both the HBM and the dedicated Inter-Core Interconnect (ICI) network which are embedded in the chips.
 With these in mind, comes SparseCore (SC).
@@ -84,4 +83,4 @@ Each compute tile consists of a fetch unit, Single Instruction Multiple Data (SI
 \subsubsection{Platform-Aware Neural Architecture Search}
 Platform-Aware Neural Architecture Search or PA-NAS has a goal to configure both the ML model and the TPU topology to benefit from each other as much as possible.
 In particular, with the mention of SC, a model in the TPU might need to use both SC and TC efficiently.
-PA-NAS optimizes operations related to this to achieve ``pareto-optimal performance and quality''.
+PA-NAS optimizes operations related to this to achieve what's called ``pareto-optimal performance and quality''.
