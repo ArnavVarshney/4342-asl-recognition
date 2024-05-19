@@ -15,7 +15,7 @@ Additionally, for server-based deployment,
 monitoring energy consumption has been vital for DNN training,
 since long-term electric bills can directly benefit from lower energy consumption.
 There exist techniques to balance performance and energy consumption such as dynamic voltage and frequency
-(DVFS)\cite{b1} and job scheduling algorithms like First Come, First Served (FCFS) or Shortest Job First (SJF)\cite{b2}, etc.
+(DVFS) and job scheduling algorithms like First Come, First Served (FCFS) or Shortest Job First (SJF)\cite{b2}, etc.
 
 Most existing benchmarks exclusively consider either performance or energy consumption for particular accelerators and/or algorithms.
 Also, there is limited data available for AMD GPUs, despite significant improvements to the ROCm ecosystem.
@@ -25,6 +25,7 @@ speech recognition and translation tasks are made.
 
 \subsection{Preliminaries}
 \label{subsec:prelims}
+
 \subsubsection{Deep Models}
 There exist various types of state-of-the-art deep architectures.
 Convolutional Neural Networks (CNNs) are preferred for image classification and object detection tasks,
@@ -43,9 +44,8 @@ to maximize hardware utilization.
 Typically, in mixed precision, FP32 master weights and loss scaling are adopted to avoid FP16's instability.
 ``Fig. \ref{fig:pipeline}'' shows the training pipeline for DNNs.
 
-\begin{table*}[h!]
+\begin{table*}[!htbp]
     \centering
-    \setlength\tabcolsep{8pt}
     \caption{Hardware Setup}
     \label{tab:hardware}
     \begin{tabular}{c c c c c c c}
@@ -69,6 +69,7 @@ The details are presented in ``Table~\ref{tab:hardware}''.
 
 \subsection{Experimental Results}
 \label{subsec:results}
+
 \subsubsection{Performance of Computation-intensive operations}
 
 \begin{figure}[htbp!]
@@ -78,19 +79,23 @@ The details are presented in ``Table~\ref{tab:hardware}''.
     \label{fig:cios}
 \end{figure}
 
-\begin{table*}[t]
-    \centering
+\begin{table}[t]
     \setlength\tabcolsep{8pt}
     \caption{The Average Utilization of TensorCore}
+    \centering
     \begin{tabular}{c c c c c c c}
         \toprule
-        DNNs             & Resnet50 & Inception v3 & Vgg16 & 2-LayerLSTM & DeepSpeech2 & Transformer \\
+        DNNs         & Tensor Core Util \\
         \midrule
-        Tensor Core Util & 9.2\%    & 6.8\%        & 7.3\% & 3.9\%       & 5.1\%       & 4.4\%       \\
+        Resnet50     & 9.2\%            \\
+        Inception v3 & 6.8\%            \\
+        Vgg16        & 7.3\%            \\
+        2-LayerLSTM  & 3.9\%            \\
+        DeepSpeech2  & 5.1\%            \\
+        Transformer  & 4.4\%            \\
         \bottomrule
-    \end{tabular}
-    \label{tab:tensorutil}
-\end{table*}
+    \end{tabular}\label{tab:tensorutil}
+\end{table}
 
 The GPU and TPU performance and utilization results are shown in ``Fig. \ref{fig:cios}''.
 Among GPUs, P100 has the lowest utilization under all observed workloads.
@@ -106,18 +111,18 @@ Therefore, it can be concluded that performance bottlenecks still exist for V100
 
 \begin{figure}[htbp!]
     \centering
-    {    \includegraphics[width=0.5\textwidth]{images/gpucnn}}
-    \caption{The results of performance comparison on GPUs with CNNs. Note that the Titan X GPU runs out of memory when training inception v3 and batchsize = 128.}
+    {    \includegraphics[width=0.4\textwidth]{images/gpucnn}}
+    \caption{The results of performance comparison on GPUs with CNNs. Note that the Titan X GPU runs out of memory when training Inception v3 and batch-size = 128.}
     \label{fig:cnn}
 \end{figure}
 
 As depicted in ``Fig. \ref{fig:cnn}'', among the GPUs tested, Tesla V100 delivers the highest performance for both FP32 and Mixed Precision training.
 When compared under the same numerical precision, NVIDIA V100 typically outperforms the AMD Radeon VII GPU by a factor of 1.5 to 2.
-Tesla P100 and Titan X (Pascal), both from NVIDIA, demonstrate similar performance levels, which can be attributed to their comparable peak FLOPS and memory bandwidth, as detailed in ``Table \ref{tab:hardware}''.
+Tesla P100 and Titan X (Pascal), both from NVIDIA, demonstrate similar performance levels, which can be attributed to their comparable peak FLOPS and memory bandwidth, as detailed in ``Table~\ref{tab:hardware}''.
 However,
 the advantage of switching from FP32 Precision to Mixed Precision results in a maximum of 2x higher throughput for V100,
 with Tensor Core utilization reaching only 9\% at most on Resnet50,
-as per ``Table \ref{tab:tensorutil}'' - a figure significantly lower than the peak FLOPS.
+as per ``Table~\ref{tab:tensorutil}''—a figure significantly lower than the peak FLOPS\@.
 Comparing the two desktop-level GPUs, NVIDIA Titan X (Pascal) and AMD Radeon VII,
 the latter's peak FLOPS and memory bandwidth are approximately 22\% and 52\% higher than the former's, respectively.
 Despite this, Titan X slightly outperforms Radeon VII on Resnet 50.
@@ -125,11 +130,12 @@ This suggests that there is room for further optimization in the AMD software ec
 
 \subsection{Evaluation}
 \label{subsec:evaluation}
+
 \subsubsection{Comparison between GPU and TPU}
 
 \begin{figure}[htbp!]
     \centering
-    {    \includegraphics[width=0.5\textwidth]{images/tpugpucomp}}
+    {    \includegraphics[width=0.4\textwidth]{images/tpugpucomp}}
     \caption{The results of performance comparison between Tesla V100 GPU and TPUs.}
     \label{fig:tpugpucomp}
 \end{figure}
@@ -145,3 +151,16 @@ The Volta architecture optimizes the convolutional components in a neural networ
 In end-to-end Mixed Precision training, Tesla V100 (PCIe) performs over twice as well as it does in FP32 training, despite only utilizing 9\% of the peak FLOPS of Tensor Core.
 However, intensive calculations in models like Resnet50 and Transformer make up over 40\% of the total calculations.
 This discrepancy could be attributed to several potential factors: the remaining FP32 low-throughput calculations in Mixed Precision training, the inherently low utilization of Tensor Core, and the limited memory bandwidth.
+
+\subsubsection{Energy Efficiency of End-to-end Training}
+\begin{figure}[htbp!]
+    \centering
+    {    \includegraphics[width=0.5\textwidth]{images/energycomp}}
+    \caption{Comparison of energy consumption on GPUs.}
+    \label{fig:energycomp}
+\end{figure}
+
+The energy consumption of various GPUs is compared across different DNN models in ``Fig. \ref{fig:energycomp}''.
+Server-level GPUs, namely Tesla V100 and P100, are generally the most energy-efficient.
+In particular, V100 consumes up to 5.2x less energy than other GPUs due to its significantly higher training throughput with minimal power sacrifice.
+For Titan X (Pascal) and Radeon VII, increasing the batch size typically enhances resource utilization and training throughput, thereby improving energy efficiency.
