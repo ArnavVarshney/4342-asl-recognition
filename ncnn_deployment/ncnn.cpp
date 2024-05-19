@@ -4,14 +4,21 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
-#include <opencv2/core.hpp>
-#include <opencv2/imgcodecs.hpp>
-#include <opencv2/highgui.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
+#include <chrono>
+#include <ctime>
+
+// //For debugging
+// #include <opencv2/core.hpp>
+// #include <opencv2/imgcodecs.hpp>
+// #include <opencv2/highgui.hpp>
+// #include <opencv2/imgproc/imgproc.hpp>
 
 using namespace std;
 
-vector<vector<double> > loadImgs(int count=1){
+ncnn::Net net;
+double duration=0;
+
+vector<vector<double> > loadImgs(int count = -1){
     fstream file;
     string line="",temp;
     double val;
@@ -20,8 +27,9 @@ vector<vector<double> > loadImgs(int count=1){
     file.open("../../mnist-sign-language/mnist_sign_language_test.csv",ios::in);
     getline(file, line);//Get rid of the coloumn names
 
-    while(count>0){
-        getline(file, line);
+    int decrement=1;
+    if(count<0)decrement = 0;
+    while( getline(file, line) && abs(count)>0){
         stringstream s(line);
 
         while(getline(s, temp, ',')){
@@ -31,7 +39,7 @@ vector<vector<double> > loadImgs(int count=1){
 
         imgs.push_back(vec);
         vec.clear();
-        count--;
+        count-=decrement;
     }
 
     return imgs;
@@ -81,10 +89,10 @@ void print_image(unsigned char img[784]){
     }
 }
 
-void print_mat(cv::Mat mat){
-    cout<<"\n\nMAT: "<<endl;
-    cout<<mat<<endl;
-}
+// void print_mat(cv::Mat mat){
+//     cout<<"\n\nMAT: "<<endl;
+//     cout<<mat<<endl;
+// }
 
 int max_score(vector<float> arr){
     int max = arr.at(0), index=0;
@@ -97,44 +105,26 @@ int max_score(vector<float> arr){
     return index;
 }
 
-int main(){
-    ncnn::Net net;
-    net.load_param("../../ncnn_out/resnet18.param");
-    net.load_model("../../ncnn_out/resnet18.bin");
-
-    vector<vector<double> > data = loadImgs(100);
-    // print_vectors(data); 
-
-    vector<double> datum = data.at(4);
+int infer(vector<double> datum){
     unsigned char img[784];
-    int label;
 
-    label = datum.at(0);
+    //Convert image
     getimage(datum, img);
-    // print_image(img);
+    ncnn::Mat out, in = ncnn::Mat::from_pixels(img, ncnn::Mat::PIXEL_GRAY, 28, 28);
 
-
-    // cv::Mat uint8_img,image = cv::Mat (28,28,CV_8U,&img);
-    // image.convertTo(uint8_img, CV_8U);
-
-    // cout<<"Label: "<<label<<endl;
-    // cv::imshow("image",uint8_img);
-    // cv::waitKey(0);
-
-
-    //Convert images
-    unsigned char* rgbdata = img;// data pointer to RGB image pixels
-    int w=28;// image width
-    int h=28;// image height
-
-
-
-    ncnn::Mat out, in = ncnn::Mat::from_pixels(rgbdata, ncnn::Mat::PIXEL_GRAY, w, h);
-
+    //Inferring
     ncnn::Extractor ex = net.create_extractor();
+    auto start = std::chrono::system_clock::now();
     ex.input("input.1", in);
+    auto end = std::chrono::system_clock::now();
     ex.extract("36", out);
 
+    //Timing processes
+    chrono::duration<double> elapsed_seconds = end-start;
+    duration+=elapsed_seconds.count();
+
+
+    //Results
     ncnn::Mat out_flatterned = out.reshape(out.w * out.h * out.c);
     std::vector<float> scores;
     scores.resize(out_flatterned.w);
@@ -142,8 +132,31 @@ int main(){
     {
         scores[j] = out_flatterned[j];
     }
-    cout<<"Label: "<<label<<endl;
-    cout<<"Predicted: "<<max_score(scores)<<endl;
-    
+    return max_score(scores);
+}
+
+int main(){
+    system("python3 ../convert.py");
+    net.load_param("../ncnn_out/model.param");
+    net.load_model("../ncnn_out/model.bin");
+
+    vector<vector<double> > data = loadImgs();
+    int count = 0;
+    for(int i=0;i<data.size();++i){
+        vector<double> datum = data.at(i);
+        int prediction = infer(datum),
+        label = datum.at(0);
+        if(label == prediction) count++;
+    }
+
+    cout<<"Accuracy: "<<count/(data.size()*1.0)*100<<"%"<<endl;
+    cout<<"Model Latency: "<<duration/(data.size()*1.0)*1000<<" ms"<<endl;
+
+    // // if want to see the images. Please place accordingly
+    // cv::Mat uint8_img,image = cv::Mat (28,28,CV_8U,&img);
+    // image.convertTo(uint8_img, CV_8U);   
+    // cout<<"Label: "<<label<<endl;
+    // cv::imshow("image",uint8_img);
+    // cv::waitKey(0);
     return 0;
 }
