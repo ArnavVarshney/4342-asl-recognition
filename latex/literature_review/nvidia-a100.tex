@@ -1,6 +1,6 @@
 \subsection{Introduction}
 \label{subsec:introduction}
-Deep neural networks are usually composed of sequential interconnected layers.
+Deep neural networks are usually composed of sequential interconnected layers \cite{b3}.
 This structure allows for extreme parallelism as computations are broken into smaller chunks, albeit still dependent on its previous layers.
 Each layer in a neural network takes in an activation tensor as well as a weight tensor.
 An activation tensor represents the output of a single node in the layer, while a weight tensor represents the learning parameters in the network.
@@ -8,8 +8,8 @@ The computation between the two tensors involves a mathematical expression simil
 
 \subsection{SM Core}
 \label{subsec:sm-core}
-The structure of the A100's SM core works via a 5-step process.
-The A100's memory hierarchy starts with the off-chip DRAM\@.
+The structure of the A100's Streaming Multiprocessor (SM) core works via a 5-step process \cite{b4}.
+The A100's memory hierarchy starts with the off-chip DRAM\@ \cite{b5}.
 The DRAM provides global access to resources for the SMs.
 Data is first loaded from the DRAM into the on-chip L2 cache, acting as a large pool of shared memory accessible by all SMs.
 An asynchronous instruction will then be used to partition the data resource for SMEM usage individually and concurrently without blocking the main execution pipeline.
