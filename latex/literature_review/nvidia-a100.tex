@@ -22,12 +22,12 @@ The SMEM connects to the tensor cores via a register file, which acts as a high-
     \label{fig:v100a100struct}
 \end{figure}
 
-To give context to the particular design of the A100, we can look at the V100, a GPU preceding the A100.
+To provide context for the specific design of the A100, its predecessor, the V100 can be examined.
 The V100 works with a 7-step process.
 In the same fashion, data is loaded into an L2 cache from the DRAM, but instead of a direct connection to the SMEM, the V100 requires an additional layer of caching.
 By having a dedicated L1 cache per SM, the V100 can make better use of the available memory bandwidth.
 Each SM can access its own L1 cache independently, reducing contention and improving overall throughput.
-The V100 lacks the asynchronous ``load and store`` instruction in its instruction set; thus it requires an explicit ``write`` instruction to the SMEM to transfer data.
+The V100 lacks the asynchronous ``load and store'' instruction in its instruction set; thus it requires an explicit ``write'' instruction to the SMEM to transfer data.
 
 \begin{figure}[htbp!]
     \centerline{\includegraphics[width=0.5\textwidth]{images/gpu_sparsity}}
@@ -39,7 +39,7 @@ The simplification of the V100 design into the A100 is actually caused by the ma
 In both the V100 and A100 designs, the neural network workloads break down each tile into four smaller workable tiles that can be processed in parallel.
 A 32-thread warp will then process each of those tiles.
 The V100 tensor cores were designed to work with 8-thread granularity, meaning each tensor core operation would process eight threads simultaneously, while the A100 works with 32-thread granularity.
-The figure above compares the V100’s and A100’s standard operation with multiple data types.
+``Fig. \ref{fig:v100a100struct}'' shows the structure of the V100 and A100, while ``Fig. \ref{fig:v100a100spars}'' shows the sparsity of the V100 and A100, comparing the V100’s and A100’s standard operation with multiple data types.
 The data types given such as TF32 and TF16 are much more efficient in using tensor-accelerated math than its floating point counterparts, having the same exponent range, albeit less precision.
 
 The 8-thread granularity of the V100's individual network tiles forces it to have a proportionally higher number of load from memory and lower bandwidth in the SMEM, since the 8-thread granularity combined with the fact that data has to move from the L2 cache, to the L1 cache and then to the SMEM, results in higher number of memory access operations per tile.
@@ -48,7 +48,8 @@ This reduction in memory access simplifies the data path by relying more on the 
 
 \subsection{L2 Cache}
 \label{subsec:l2-cache}
-An L2 cache in the A100 is a globally shared resource for the SMs.The A100 divides its L2 cache partitions into two distinct partitions: high bandwidth access and low latency memory access.
+An L2 cache in the A100 is a globally shared resource for the SMs.
+The A100 divides its L2 cache partitions into two distinct partitions: high-bandwidth access and low latency memory access.
 The cache allows for a significant increase in machine learning workloads, with larger datasets and models now being able to be cached and repeatedly hit, contrasting to the V100 requiring slower reading and writing, from and to the HBM2 memory.
 The prime enabler of the partition is the L2 Cache Residency Control.
 The residency control basically enables a partition of the cache to be used for persistent data access.The A100 employs two key mechanisms to manage persistent accesses to the L2 cache:
@@ -59,7 +60,7 @@ This method benefits from array-like or consecutive structures such as neural ne
 
 \subsubsection{Per-Memory-Operation Persistent Control} The residency control exposes control over Individual memory accesses to be tagged as persistent by the user, otherwise individual access will not be tagged.
 These two persistent access mechanisms work together to optimize the utilization of the L2 cache.
-Cache Residency only allows cache tagging when there is ``group access`` to a particular address at a close time, while individual memory access will bypass cache, or can be controlled directly by user to persist.
+Cache Residency only allows cache tagging when there is ``group access'' to a particular address at a close time, while individual memory access will bypass cache, or can be controlled directly by user to persist.
 
 \subsection{DRAM}
 \label{subsec:dram}
